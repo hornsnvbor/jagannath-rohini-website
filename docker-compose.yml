@@ -1,0 +1,45 @@
+# One-command production deploy on any VPS with Docker:
+#   cp backend/.env.example backend/.env   # fill in real values
+#   docker compose up -d --build
+#
+# The single `app` container serves BOTH the built frontend (FRONTEND_DIST)
+# and the FastAPI backend, plus a bundled Postgres database.
+services:
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      # Non-secret local-only credentials tuned before deploy in production;
+      # the real DB connection string lives in backend/.env as DATABASE_URL.
+      POSTGRES_USER: temple
+      POSTGRES_PASSWORD: temple
+      POSTGRES_DB: jagannath
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U temple -d jagannath"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      args:
+        # Public Razorpay Key ID baked into the frontend at build time.
+        VITE_RAZORPAY_KEY_ID: ${VITE_RAZORPAY_KEY_ID:-rzp_test_xxxxxxxxxxxx}
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - backend/.env
+    environment:
+      DATABASE_URL: postgresql://temple:temple@db:5432/jagannath
+      ENVIRONMENT: production
+      FRONTEND_DIST: ../frontend/dist
+
+volumes:
+  postgres_data:

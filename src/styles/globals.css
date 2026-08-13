@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 4%;
+    --card: 36 45% 96%;
+    --card-foreground: 0 0% 4%;
+    --primary: 34 100% 57%;
+    --primary-foreground: 0 0% 100%;
+    --muted: 33 69% 97%;
+    --muted-foreground: 36 45% 36%;
+    --border: 0 0% 85%;
+    --temple-dark: 234 9% 19%;
+    --temple-dark-deeper: 234 12% 13%;
+    --temple-muted-bg: 33 69% 97%;
+    --input: 0 0% 85%;
+    --ring: 34 100% 57%;
+    --secondary: 33 69% 94%;
+    --secondary-foreground: 0 0% 4%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --accent: 33 69% 94%;
+    --accent-foreground: 0 0% 4%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 4%;
+    --font-sans: "Open Sans", sans-serif;
+    --font-heading: "Poppins", sans-serif;
+    --font-serif: "Poppins", serif;
+    --font-mono: monospace;
+    --radius: 0.5rem;
+    --radius-button: 0.5rem;
+  }
+  * { @apply border-border; }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading) !important;
+  }
+}
+
+@layer utilities {
+  .bg-temple-dark { background-color: hsl(var(--temple-dark)); }
+  .bg-temple-dark-deeper { background-color: hsl(var(--temple-dark-deeper)); }
+  .text-temple-dark { color: hsl(var(--temple-dark)); }
+}
+
+html { scroll-behavior: smooth; }

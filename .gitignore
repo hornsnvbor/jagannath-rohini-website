@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Environment / secrets — NEVER commit these
+.env
+.env.local
+.env.production
+.env.*.local
+backend/.env
+*.pem
+*.key
+*.pfx
+
+# Python
+.venv/
+backend/.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+backend/temple.db
+*.sqlite3
+
+# Logs
+*.log
+npm-debug.log*
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

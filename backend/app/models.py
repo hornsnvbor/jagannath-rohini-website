@@ -1,0 +1,126 @@
+import enum
+import uuid
+from datetime import datetime, timezone
+
+from sqlalchemy import String, Text, Boolean, DateTime, Enum, Numeric
+from sqlalchemy.orm import Mapped, mapped_column
+
+from app.database import Base
+
+
+def _uuid() -> str:
+    return str(uuid.uuid4())
+
+
+def _now() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+class DonationStatus(str, enum.Enum):
+    created = "created"   # donor filled the form, Razorpay order created, payment not yet done
+    paid = "paid"         # confirmed ONLY by verified webhook
+    failed = "failed"
+    refunded = "refunded"
+
+
+class FormStatus(str, enum.Enum):
+    new = "new"
+    contacted = "contacted"
+    closed = "closed"
+
+
+class Donation(Base):
+    """
+    Donor details are captured and stored the moment the donor submits the
+    pre-payment form — this is intentional (temple wants a record even if
+    payment fails/abandons). Payment status is only ever flipped to `paid`
+    by the verified Razorpay webhook handler, never by the frontend.
+    """
+    __tablename__ = "donations"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+
+    donor_name: Mapped[str] = mapped_column(String(120))
+    donor_phone: Mapped[str] = mapped_column(String(20))
+    donor_email: Mapped[str] = mapped_column(String(255))
+    donor_pan: Mapped[str | None] = mapped_column(String(10), nullable=True)  # for 80G receipt
+    address: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    cause: Mapped[str] = mapped_column(String(80))  # e.g. "general", "annadaan", "rath_yatra"
+    amount: Mapped[float] = mapped_column(Numeric(10, 2))
+
+    razorpay_order_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    razorpay_payment_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    status: Mapped[DonationStatus] = mapped_column(Enum(DonationStatus), default=DonationStatus.created)
+
+    receipt_number: Mapped[str | None] = mapped_column(String(80), nullable=True, index=True)
+    receipt_sent: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, onupdate=_now)
+
+
+class MembershipForm(Base):
+    __tablename__ = "membership_forms"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    full_name: Mapped[str] = mapped_column(String(120))
+    phone: Mapped[str] = mapped_column(String(20))
+    email: Mapped[str] = mapped_column(String(255))
+    address: Mapped[str] = mapped_column(Text)
+    occupation: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    family_members: Mapped[int | None] = mapped_column(nullable=True)
+    message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    status: Mapped[FormStatus] = mapped_column(Enum(FormStatus), default=FormStatus.new)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class SevaForm(Base):
+    __tablename__ = "seva_forms"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    full_name: Mapped[str] = mapped_column(String(120))
+    phone: Mapped[str] = mapped_column(String(20))
+    email: Mapped[str] = mapped_column(String(255))
+    seva_type: Mapped[str] = mapped_column(String(120))
+    preferred_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    status: Mapped[FormStatus] = mapped_column(Enum(FormStatus), default=FormStatus.new)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class BlogPost(Base):
+    __tablename__ = "blog_posts"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    title: Mapped[str] = mapped_column(String(200))
+    slug: Mapped[str] = mapped_column(String(220), unique=True, index=True)
+    excerpt: Mapped[str | None] = mapped_column(String(400), nullable=True)
+    content: Mapped[str] = mapped_column(Text)
+    cover_image: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    published: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, onupdate=_now)
+
+
+class GalleryItem(Base):
+    __tablename__ = "gallery_items"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    title: Mapped[str] = mapped_column(String(200))
+    image_url: Mapped[str] = mapped_column(String(500))
+    category: Mapped[str] = mapped_column(String(80), default="general")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class ProcessedWebhookEvent(Base):
+    """Idempotency guard for Razorpay webhooks — one row per event id.
+
+    The webhook handler inserts this row before processing. If the row
+    already exists (duplicate delivery), the event is skipped. Prevents
+    double-marking payments and double-sending receipts when Razorpay
+    retries a webhook whose response it never saw.
+    """
+    __tablename__ = "processed_webhook_events"
+
+    event_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
