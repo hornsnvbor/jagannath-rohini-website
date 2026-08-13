@@ -6,7 +6,7 @@ import { getLiveStatus, type LiveStatus } from '@/lib/api';
 // Fallback: the temple's YouTube channel handle, used to embed the "live tab"
 // even when our backend can't confirm live status (e.g. YOUTUBE_API_KEY not
 // yet configured). Update this to the real channel handle.
-const CHANNEL_HANDLE = 'JagannathMandirRohini';
+const CHANNEL_HANDLE = 'Jeetendra.Happy-777_Life';
 
 const aartiSchedule = [
   { name: 'Mangala Aarti', time: '5:30 AM' },
