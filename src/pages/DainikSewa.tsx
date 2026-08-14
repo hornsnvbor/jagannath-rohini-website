@@ -2,20 +2,16 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   HandHeart, User, Mail, Phone, Home, Briefcase, Calendar, HeartPulse,
-  Contact, Repeat, Users, Camera, PenLine, IndianRupee, ChevronDown,
+  Contact, Repeat, Users, PenLine, IndianRupee, ChevronDown,
 } from 'lucide-react';
 import { createDainikOrder, getRazorpayPublicKey, uploadFile, verifyDainikPayment, verifyDainikSubscription } from '../lib/api';
 import { useRazorpay } from '../lib/useRazorpay';
 import { FormPageShell } from '../components/FormPageShell';
 import { numberToIndianWords } from '../lib/utils';
-import { Field, FileInput, SectionTitle, inputClass } from '../components/membership/FormControls';
+import { Field, FileInput, SectionTitle, inputClass, IconTextInput } from '../components/membership/FormControls';
 
-const ONE_TIME_AMOUNT = 2100;
-const RECURRING_AMOUNT = 200;
-const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
-
-const icon = 'absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400';
-const iconTextarea = 'absolute left-3 top-3 w-4 h-4 text-gray-400';
+const icon = 'absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400';
+const iconTextarea = 'absolute left-4 top-3 w-4 h-4 text-gray-400';
 
 const initialForm = {
   name: '', gotra: '', father_name: '', spouse_name: '',
@@ -218,12 +214,17 @@ export default function DainikSewaPage() {
         <section className="space-y-4">
           <SectionTitle>Personal Details</SectionTitle>
           <div className="grid md:grid-cols-2 gap-4">
-            <Field label="Name (Capital Letters)" required error={errors.name}>
-              <div className="relative">
-                <User className={icon} />
-                <input type="text" value={form.name} onChange={(e) => set('name', e.target.value.toUpperCase())} placeholder="FULL NAME" className={inputClass(!!errors.name)} />
-              </div>
-            </Field>
+            <IconTextInput
+  label="Name (Capital Letters)"
+  required
+  error={errors.name}
+  icon={User}
+  type="text"
+  placeholder="FULL NAME"
+  value={form.name}
+  onChange={(e) => set('name', e.target.value.toUpperCase())}
+  className={inputClass(!!errors.name)}
+/>
             <Field label="Gotra">
               <div className="relative">
                 <User className={icon} />
@@ -243,48 +244,76 @@ export default function DainikSewaPage() {
               </div>
             </Field>
           </div>
-          <Field label="Office Address">
-            <div className="relative">
-              <Briefcase className={iconTextarea} />
-              <textarea value={form.office_address} onChange={(e) => set('office_address', e.target.value)} className={`${inputClass()} min-h-[70px] pl-10`} />
-            </div>
-          </Field>
-          <Field label="Residence Address">
-            <div className="relative">
-              <Home className={iconTextarea} />
-              <textarea value={form.residence_address} onChange={(e) => set('residence_address', e.target.value)} className={`${inputClass()} min-h-[70px] pl-10`} />
-            </div>
-          </Field>
+          <IconTextInput
+  label="Office Address"
+  error={errors.office_address}
+  icon={Briefcase}
+  asTextarea
+  placeholder="OFFICE ADDRESS"
+  value={form.office_address}
+  onChange={(e) => set('office_address', e.target.value)}
+  className={`${inputClass()} min-h-[70px]`
+}
+/>
+            <IconTextInput
+  label="Residence Address"
+  error={errors.residence_address}
+  icon={Home}
+  asTextarea
+  placeholder="RESIDENCE ADDRESS"
+  value={form.residence_address}
+  onChange={(e) => set('residence_address', e.target.value)}
+  className={`${inputClass()} min-h-[70px]`
+}
+/>
         </section>
 
         {/* Contact Details */}
         <section className="space-y-4">
           <SectionTitle>Contact Details</SectionTitle>
           <div className="grid md:grid-cols-2 gap-4">
-            <Field label="Email" required error={errors.email}>
-              <div className="relative">
-                <Mail className={icon} />
-                <input type="email" value={form.email} onChange={(e) => set('email', e.target.value)} className={inputClass(!!errors.email)} placeholder="you@example.com" />
-              </div>
-            </Field>
-            <Field label="Office Telephone">
-              <div className="relative">
-                <Phone className={icon} />
-                <input type="tel" value={form.office_telephone} onChange={(e) => set('office_telephone', e.target.value.replace(/\D/g, ''))} className={inputClass()} maxLength={15} />
-              </div>
-            </Field>
-            <Field label="Residence Telephone">
-              <div className="relative">
-                <Phone className={icon} />
-                <input type="tel" value={form.residence_telephone} onChange={(e) => set('residence_telephone', e.target.value.replace(/\D/g, ''))} className={inputClass()} maxLength={15} />
-              </div>
-            </Field>
-            <Field label="Mobile Number" required error={errors.mobile}>
-              <div className="relative">
-                <Phone className={icon} />
-                <input type="tel" value={form.mobile} onChange={(e) => set('mobile', e.target.value.replace(/\D/g, ''))} className={inputClass(!!errors.mobile)} placeholder="9876543210" maxLength={10} />
-              </div>
-            </Field>
+            <IconTextInput
+  label="Email"
+  required
+  error={errors.email}
+  icon={Mail}
+  type="email"
+  placeholder="you@example.com"
+  value={form.email}
+  onChange={(e) => set('email', e.target.value)}
+  className={inputClass(!!errors.email)}
+/>
+            <IconTextInput
+  label="Office Telephone"
+  error={errors.office_telephone}
+  icon={Phone}
+  type="tel"
+  placeholder="9876543210"
+  value={form.office_telephone}
+  onChange={(e) => set('office_telephone', e.target.value.replace(/\D/g, ''))}
+  className={inputClass()}
+/>
+            <IconTextInput
+  label="Residence Telephone"
+  error={errors.residence_telephone}
+  icon={Phone}
+  type="tel"
+  placeholder="9876543210"
+  value={form.residence_telephone}
+  onChange={(e) => set('residence_telephone', e.target.value.replace(/\D/g, ''))}
+  className={inputClass()}
+/>
+            <IconTextInput
+  label="Mobile Number"
+  required
+  error={errors.mobile}
+  icon={Phone}
+  type="tel"
+  placeholder="9876543210"
+  value={form.mobile}
+  onChange={(e) => set('mobile', e.target.value.replace(/\D/g, ''))}
+  className={inputClass(!!errors.mobile)}
+/>
           </div>
         </section>
 
@@ -292,36 +321,56 @@ export default function DainikSewaPage() {
         <section className="space-y-4">
           <SectionTitle>Family / Professional Details</SectionTitle>
           <div className="grid md:grid-cols-2 gap-4">
-            <Field label="Self Profession">
-              <div className="relative">
-                <Briefcase className={icon} />
-                <input type="text" value={form.self_profession} onChange={(e) => set('self_profession', e.target.value)} className={inputClass()} />
-              </div>
-            </Field>
-            <Field label="Spouse Profession">
-              <div className="relative">
-                <Briefcase className={icon} />
-                <input type="text" value={form.spouse_profession} onChange={(e) => set('spouse_profession', e.target.value)} className={inputClass()} />
-              </div>
-            </Field>
-            <Field label="Self Birthday / Date of Birth">
-              <div className="relative">
-                <Calendar className={icon} />
-                <input type="date" value={form.self_dob} onChange={(e) => set('self_dob', e.target.value)} className={inputClass()} />
-              </div>
-            </Field>
-            <Field label="Spouse Birthday / Date of Birth">
-              <div className="relative">
-                <Calendar className={icon} />
-                <input type="date" value={form.spouse_dob} onChange={(e) => set('spouse_dob', e.target.value)} className={inputClass()} />
-              </div>
-            </Field>
-            <Field label="Marriage Anniversary">
-              <div className="relative">
-                <HeartPulse className={icon} />
-                <input type="date" value={form.marriage_anniversary} onChange={(e) => set('marriage_anniversary', e.target.value)} className={inputClass()} />
-              </div>
-            </Field>
+            <IconTextInput
+  label="Self Profession"
+  error={errors.self_profession}
+  icon={Briefcase}
+  type="text"
+  placeholder="SELF PROFESSION"
+  value={form.self_profession}
+  onChange={(e) => set('self_profession', e.target.value)}
+  className={inputClass()}
+/>
+            <IconTextInput
+  label="Spouse Profession"
+  error={errors.spouse_profession}
+  icon={Briefcase}
+  type="text"
+  placeholder="SPOUSE PROFESSION"
+  value={form.spouse_profession}
+  onChange={(e) => set('spouse_profession', e.target.value)}
+  className={inputClass()}
+/>
+            <IconTextInput
+  label="Self Birthday / Date of Birth"
+  error={errors.self_dob}
+  icon={Calendar}
+  type="date"
+  placeholder="SELF DOB"
+  value={form.self_dob}
+  onChange={(e) => set('self_dob', e.target.value)}
+  className={inputClass()}
+/>
+            <IconTextInput
+  label="Spouse Birthday / Date of Birth"
+  error={errors.spouse_dob}
+  icon={Calendar}
+  type="date"
+  placeholder="SPOUSE DOB"
+  value={form.spouse_dob}
+  onChange={(e) => set('spouse_dob', e.target.value)}
+  className={inputClass()}
+/>
+            <IconTextInput
+  label="Marriage Anniversary"
+  error={errors.marriage_anniversary}
+  icon={HeartPulse}
+  type="date"
+  placeholder="MARRIAGE ANNIVERSARY"
+  value={form.marriage_anniversary}
+  onChange={(e) => set('marriage_anniversary', e.target.value)}
+  className={inputClass()}
+/>
           </div>
 
           {/* Children */}
@@ -338,18 +387,26 @@ export default function DainikSewaPage() {
               <div className="px-4 pb-4 space-y-4">
                 {childFields.map((c) => (
                   <div key={c.key} className="grid md:grid-cols-2 gap-4">
-                    <Field label={`Child ${c.key.replace('child', '')} — Name`}>
-                      <div className="relative">
-                        <User className={icon} />
-                        <input type="text" value={form[c.nameKey]} onChange={(e) => set(c.nameKey, e.target.value)} className={inputClass()} />
-                      </div>
-                    </Field>
-                    <Field label={`Child ${c.key.replace('child', '')} — Birthday`}>
-                      <div className="relative">
-                        <Calendar className={icon} />
-                        <input type="date" value={form[c.bdKey]} onChange={(e) => set(c.bdKey, e.target.value)} className={inputClass()} />
-                      </div>
-                    </Field>
+                    <IconTextInput
+                      label={c.key.replace('child', '') + ' — Name'}
+                      error={errors[c.nameKey]}
+                      icon={User}
+                      type="text"
+                      placeholder={c.key.replace('child', '') + ' NAME'}
+                      value={form[c.nameKey]}
+                      onChange={(e) => set(c.nameKey, e.target.value)}
+                      className={inputClass()}
+                    />
+                    <IconTextInput
+                      label={c.key.replace('child', '') + ' — Birthday'}
+                      error={errors[c.bdKey]}
+                      icon={Calendar}
+                      type="date"
+                      placeholder={c.key.replace('child', '') + ' BIRTHDAY'}
+                      value={form[c.bdKey]}
+                      onChange={(e) => set(c.bdKey, e.target.value)}
+                      className={inputClass()}
+                    />
                   </div>
                 ))}
               </div>
@@ -385,12 +442,17 @@ export default function DainikSewaPage() {
         {/* Temple Contribution */}
         <section className="space-y-4">
           <SectionTitle>Temple Contribution</SectionTitle>
-          <Field label="How can you help for the development of the Jagannath Temple?">
-            <div className="relative">
-              <Contact className={iconTextarea} />
-              <textarea value={form.temple_contribution} onChange={(e) => set('temple_contribution', e.target.value)} className={`${inputClass()} min-h-[90px] pl-10`} placeholder="Volunteer, donation, skills..." />
-            </div>
-          </Field>
+          <IconTextInput
+  label="How can you help for the development of the Jagannath Temple?"
+  error={errors.temple_contribution}
+  icon={Contact}
+  asTextarea
+  placeholder="Volunteer, donation, skills..."
+  value={form.temple_contribution}
+  onChange={(e) => set('temple_contribution', e.target.value)}
+  className={`${inputClass()} min-h-[90px]`
+}
+/>
         </section>
 
         {/* Photo */}
@@ -411,12 +473,16 @@ export default function DainikSewaPage() {
             <span>I consent to the use of the provided details for the member directory / publication by the temple.</span>
           </label>
           {errors.consent && <p className="text-red-500 text-sm">{errors.consent}</p>}
-          <Field label="Applicant Signature" hint="Type your name as digital signature">
-            <div className="relative">
-              <PenLine className={icon} />
-              <input type="text" value={form.applicant_signature} onChange={(e) => set('applicant_signature', e.target.value.toUpperCase())} className={inputClass()} placeholder="Type full name" />
-            </div>
-          </Field>
+           <IconTextInput
+  label="Applicant Signature"
+  error={errors.applicant_signature}
+  icon={PenLine}
+  type="text"
+  placeholder="TYPE FULL NAME"
+  value={form.applicant_signature}
+  onChange={(e) => set('applicant_signature', e.target.value.toUpperCase())}
+  className={inputClass()}
+/>
         </section>
 
         {/* Payment */}

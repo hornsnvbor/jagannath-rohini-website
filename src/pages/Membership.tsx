@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Users, User, Phone, Mail, Home, Briefcase, MessageSquare } from 'lucide-react';
 import { submitMembership } from '../lib/api';
-import { FormPageShell } from '../components/FormPageShell';
+import { FormPageShell, IconTextInput } from '../components/membership/FormControls';
 
 export default function MembershipPage() {
   const [loading, setLoading] = useState(false);
@@ -57,75 +57,52 @@ export default function MembershipPage() {
       icon={<Users className="w-6 h-6" />}
     >
       <form onSubmit={handleSubmit} className="space-y-5">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Full Name <span className="text-red-500">*</span>
-          </label>
-          <div className="relative">
-            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              value={form.full_name}
-              onChange={e => setForm({ ...form, full_name: e.target.value })}
-              className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition ${errors.full_name ? 'border-red-500' : 'border-gray-300'}`}
-              placeholder="Your full name"
-            />
-          </div>
-          {errors.full_name && <p className="text-red-500 text-sm mt-1">{errors.full_name}</p>}
-        </div>
+        <IconTextInput
+  label="Full Name"
+  required
+  error={errors.full_name}
+  icon={User}
+  type="text"
+  placeholder="Your full name"
+  value={form.full_name}
+  onChange={e => setForm({ ...form, full_name: e.target.value })}
+  className=""
 
-        <div className="grid md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Phone <span className="text-red-500">*</span>
-            </label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="tel"
-                value={form.phone}
-                onChange={e => setForm({ ...form, phone: e.target.value.replace(/\D/g, '') })}
-                className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition ${errors.phone ? 'border-red-500' : 'border-gray-300'}`}
-                placeholder="9876543210"
-                maxLength={10}
-              />
-            </div>
-            {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
-          </div>
+/>
+        <IconTextInput
+  label="Phone"
+  required
+  error={errors.phone}
+  icon={Phone}
+  type="tel"
+  placeholder="9876543210"
+  value={form.phone}
+  onChange={e => setForm({ ...form, phone: e.target.value.replace(/\D/g, '') })}
+  className=""
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email <span className="text-red-500">*</span>
-            </label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="email"
-                value={form.email}
-                onChange={e => setForm({ ...form, email: e.target.value })}
-                className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
-                placeholder="you@example.com"
-              />
-            </div>
-            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
-          </div>
-        </div>
+/>
+        <IconTextInput
+  label="Email"
+  required
+  error={errors.email}
+  icon={Mail}
+  type="email"
+  placeholder="you@example.com"
+  value={form.email}
+  onChange={e => setForm({ ...form, email: e.target.value })}
+  className=""
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Address <span className="text-red-500">*</span>
-          </label>
-          <div className="relative">
-            <Home className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
-            <textarea
-              value={form.address}
-              onChange={e => setForm({ ...form, address: e.target.value })}
-              className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition min-h-[80px] ${errors.address ? 'border-red-500' : 'border-gray-300'}`}
-              placeholder="Your complete address"
-            />
-          </div>
-          {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
-        </div>
+/>
+<IconTextInput
+  label="Address"
+  error={errors.address}
+  icon={Home}
+  placeholder="Your complete address"
+  value={form.address}
+  onChange={e => setForm({ ...form, address: e.target.value })}
+  className="min-h-[80px]"
+  asTextarea
+/>
 
         <div className="grid md:grid-cols-2 gap-4">
           <div>
@@ -133,13 +110,15 @@ export default function MembershipPage() {
               Occupation
             </label>
             <div className="relative">
-              <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
+              <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <IconTextInput
+                label="Occupation"
+                error={errors.occupation}
+                icon={Briefcase}
+                placeholder="Your profession"
                 value={form.occupation}
                 onChange={e => setForm({ ...form, occupation: e.target.value })}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition"
-                placeholder="Your profession"
+                className=""
               />
             </div>
           </div>
@@ -159,20 +138,61 @@ export default function MembershipPage() {
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Message / Special Requests
-          </label>
-          <div className="relative">
-            <MessageSquare className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
-            <textarea
-              value={form.message}
-              onChange={e => setForm({ ...form, message: e.target.value })}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition min-h-[80px]"
-              placeholder="Any message or special requests..."
+        <IconTextInput
+  label="Message / Special Requests"
+  error={errors.message}
+  icon={MessageSquare}
+  placeholder="Any message or special requests..."
+  value={form.message}
+  onChange={e => setForm({ ...form, message: e.target.value })}
+  className="min-h-[80px]"
+  asTextarea
+/>
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Occupation
+            </label>
+            <div className="relative">
+              <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <IconTextInput
+                label="Occupation"
+                error={errors.occupation}
+                icon={Briefcase}
+                type="text"
+                placeholder="Your profession"
+                value={form.occupation}
+                onChange={e => setForm({ ...form, occupation: e.target.value })}
+                className=""
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Family Members
+            </label>
+            <input
+              type="number"
+              value={form.family_members}
+              onChange={e => setForm({ ...form, family_members: parseInt(e.target.value) || 1 })}
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition"
+              min="1"
+              max="50"
             />
           </div>
         </div>
+
+        <IconTextInput
+  label="Message / Special Requests"
+  error={errors.message}
+  icon={MessageSquare}
+  type="textarea"
+  placeholder="Any message or special requests..."
+  value={form.message}
+  onChange={e => setForm({ ...form, message: e.target.value })}
+  className="min-h-[80px]"
+/>
 
         <button
           type="submit"

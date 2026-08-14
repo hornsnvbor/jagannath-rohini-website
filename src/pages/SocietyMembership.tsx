@@ -2,30 +2,13 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Users, User, Phone, Mail, FileText, Home, Briefcase, Calendar,
-  Type, HeartPulse, UserPlus, Camera, IdCard, IndianRupee, Handshake, PenLine,
+  Type, HeartPulse, UserPlus, IdCard, IndianRupee, Handshake, PenLine,
 } from 'lucide-react';
 import { createSocietyOrder, getRazorpayPublicKey, uploadFile, verifySocietyPayment } from '../lib/api';
 import { useRazorpay } from '../lib/useRazorpay';
 import { FormPageShell } from '../components/FormPageShell';
 import { numberToIndianWords } from '../lib/utils';
-import { Field, FileInput, SectionTitle, inputClass } from '../components/membership/FormControls';
-
-const MEMBERSHIP_TYPES: { value: string; label: string; amount: number }[] = [
-  { value: 'partner', label: 'Partner Member', amount: 551000 },
-  { value: 'founder', label: 'Founder Member (Voting Right)', amount: 111000 },
-  { value: 'life', label: 'Life Member', amount: 73000 },
-  { value: 'general', label: 'General Member', amount: 31000 },
-  { value: 'advisor', label: 'Advisor', amount: 251000 },
-];
-
-const AMOUNTS: Record<string, number> = Object.fromEntries(
-  MEMBERSHIP_TYPES.map((t) => [t.value, t.amount]),
-);
-
-const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
-
-const icon = 'absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400';
-const iconTextarea = 'absolute left-3 top-3 w-4 h-4 text-gray-400';
+import { Field, FileInput, SectionTitle, inputClass, IconTextInput } from '../components/membership/FormControls';
 
 const initialForm = {
   membership_type: 'general',
@@ -205,91 +188,138 @@ export default function SocietyMembershipPage() {
         <section className="space-y-4">
           <SectionTitle>Personal Details</SectionTitle>
           <div className="grid md:grid-cols-2 gap-4">
-            <Field label="Name (Capital Letters)" required error={errors.name}>
-              <div className="relative">
-                <User className={icon} />
-                <input type="text" value={form.name} onChange={(e) => set('name', e.target.value.toUpperCase())}
-                  placeholder="FULL NAME" className={inputClass(!!errors.name)} />
-              </div>
-            </Field>
-            <Field label="Father / Husband Name">
-              <div className="relative">
-                <User className={icon} />
-                <input type="text" value={form.father_husband_name} onChange={(e) => set('father_husband_name', e.target.value)} className={inputClass()} />
-              </div>
-            </Field>
-            <Field label="Gotra">
-              <div className="relative">
-                <Type className={icon} />
-                <input type="text" value={form.gotra} onChange={(e) => set('gotra', e.target.value)} className={inputClass()} />
-              </div>
-            </Field>
-            <Field label="Date of Birth">
-              <div className="relative">
-                <Calendar className={icon} />
-                <input type="date" value={form.dob} onChange={(e) => set('dob', e.target.value)} className={inputClass()} />
-              </div>
-            </Field>
-            <Field label="Blood Group">
-              <div className="relative">
-                <HeartPulse className={icon} />
-                <select value={form.blood_group} onChange={(e) => set('blood_group', e.target.value)} className={inputClass()}>
-                  <option value="">Select blood group</option>
-                  {BLOOD_GROUPS.map((b) => <option key={b} value={b}>{b}</option>)}
-                </select>
-              </div>
-            </Field>
+            <IconTextInput
+  label="Name (Capital Letters)"
+  required
+  error={errors.name}
+  icon={User}
+  type="text"
+  placeholder="FULL NAME"
+  value={form.name}
+  onChange={(e) => set('name', e.target.value.toUpperCase())}
+  className={inputClass(!!errors.name)}
+/>
+            <IconTextInput
+  label="Father / Husband Name"
+  error={errors.father_husband_name}
+  icon={User}
+  type="text"
+  placeholder="FATHER / HUSBAND NAME"
+  value={form.father_husband_name}
+  onChange={(e) => set('father_husband_name', e.target.value)}
+  className={inputClass()}
+/>
+            <IconTextInput
+  label="Gotra"
+  error={errors.gotra}
+  icon={Type}
+  type="text"
+  placeholder="GOTRA"
+  value={form.gotra}
+  onChange={(e) => set('gotra', e.target.value)}
+  className={inputClass()}
+/>
+            <IconTextInput
+  label="Date of Birth"
+  error={errors.dob}
+  icon={Calendar}
+  type="date"
+  placeholder="DATE OF BIRTH"
+  value={form.dob}
+  onChange={(e) => set('dob', e.target.value)}
+  className={inputClass()}
+/>
+            <IconTextInput
+  label="Blood Group"
+  error={errors.blood_group}
+  icon={HeartPulse}
+  type="select"
+  placeholder="SELECT BLOOD GROUP"
+  value={form.blood_group}
+  onChange={(e) => set('blood_group', e.target.value)}
+  className={inputClass()}
+/>
           </div>
-          <Field label="Residence Address">
-            <div className="relative">
-              <Home className={iconTextarea} />
-              <textarea value={form.residence_address} onChange={(e) => set('residence_address', e.target.value)}
-                className={`${inputClass()} min-h-[70px] pl-10`} />
-            </div>
-          </Field>
-          <Field label="Office Address">
-            <div className="relative">
-              <Briefcase className={iconTextarea} />
-              <textarea value={form.office_address} onChange={(e) => set('office_address', e.target.value)}
-                className={`${inputClass()} min-h-[70px] pl-10`} />
-            </div>
-          </Field>
+          <IconTextInput
+  label="Residence Address"
+  error={errors.residence_address}
+  icon={Home}
+  asTextarea
+  placeholder="RESIDENCE ADDRESS"
+  value={form.residence_address}
+  onChange={(e) => set('residence_address', e.target.value)}
+  className={`${inputClass()} min-h-[70px]`
+}
+/>
+<IconTextInput
+  label="Office Address"
+  error={errors.office_address}
+  icon={Briefcase}
+  asTextarea
+  placeholder="OFFICE ADDRESS"
+  value={form.office_address}
+  onChange={(e) => set('office_address', e.target.value)}
+  className={`${inputClass()} min-h-[70px]`
+}
+/>
         </section>
 
         {/* Contact Details */}
         <section className="space-y-4">
           <SectionTitle>Contact Details</SectionTitle>
           <div className="grid md:grid-cols-2 gap-4">
-            <Field label="Residence Telephone">
-              <div className="relative">
-                <Phone className={icon} />
-                <input type="tel" value={form.residence_telephone} onChange={(e) => set('residence_telephone', e.target.value.replace(/\D/g, ''))} className={inputClass()} maxLength={15} />
-              </div>
-            </Field>
-            <Field label="Office Telephone">
-              <div className="relative">
-                <Phone className={icon} />
-                <input type="tel" value={form.office_telephone} onChange={(e) => set('office_telephone', e.target.value.replace(/\D/g, ''))} className={inputClass()} maxLength={15} />
-              </div>
-            </Field>
-            <Field label="Mobile Number" required error={errors.mobile}>
-              <div className="relative">
-                <Phone className={icon} />
-                <input type="tel" value={form.mobile} onChange={(e) => set('mobile', e.target.value.replace(/\D/g, ''))} className={inputClass(!!errors.mobile)} placeholder="9876543210" maxLength={10} />
-              </div>
-            </Field>
-            <Field label="Fax">
-              <div className="relative">
-                <Phone className={icon} />
-                <input type="text" value={form.fax} onChange={(e) => set('fax', e.target.value)} className={inputClass()} />
-              </div>
-            </Field>
-            <Field label="Email" required error={errors.email}>
-              <div className="relative">
-                <Mail className={icon} />
-                <input type="email" value={form.email} onChange={(e) => set('email', e.target.value)} className={inputClass(!!errors.email)} placeholder="you@example.com" />
-              </div>
-            </Field>
+            <IconTextInput
+  label="Residence Telephone"
+  error={errors.residence_telephone}
+  icon={Phone}
+  type="tel"
+  placeholder="9876543210"
+  value={form.residence_telephone}
+  onChange={(e) => set('residence_telephone', e.target.value.replace(/\D/g, ''))}
+  className={inputClass()}
+/>
+            <IconTextInput
+  label="Office Telephone"
+  error={errors.office_telephone}
+  icon={Phone}
+  type="tel"
+  placeholder="9876543210"
+  value={form.office_telephone}
+  onChange={(e) => set('office_telephone', e.target.value.replace(/\D/g, ''))}
+  className={inputClass()}
+/>
+            <IconTextInput
+  label="Mobile Number"
+  required
+  error={errors.mobile}
+  icon={Phone}
+  type="tel"
+  placeholder="9876543210"
+  value={form.mobile}
+  onChange={(e) => set('mobile', e.target.value.replace(/\D/g, ''))}
+  className={inputClass(!!errors.mobile)}
+/>
+            <IconTextInput
+  label="Fax"
+  error={errors.fax}
+  icon={Phone}
+  type="text"
+  placeholder="FAX"
+  value={form.fax}
+  onChange={(e) => set('fax', e.target.value)}
+  className={inputClass()}
+/>
+            <IconTextInput
+  label="Email"
+  required
+  error={errors.email}
+  icon={Mail}
+  type="email"
+  placeholder="you@example.com"
+  value={form.email}
+  onChange={(e) => set('email', e.target.value)}
+  className={inputClass(!!errors.email)}
+/>
           </div>
         </section>
 
@@ -297,18 +327,27 @@ export default function SocietyMembershipPage() {
         <section className="space-y-4">
           <SectionTitle>Professional Details</SectionTitle>
           <div className="grid md:grid-cols-2 gap-4">
-            <Field label="PAN Number" hint="Optional, for 80G receipt">
-              <div className="relative">
-                <FileText className={icon} />
-                <input type="text" value={form.pan} onChange={(e) => set('pan', e.target.value.toUpperCase())} className={inputClass()} placeholder="ABCDE1234F" maxLength={10} />
-              </div>
-            </Field>
-            <Field label="Occupation & Designation">
-              <div className="relative">
-                <Briefcase className={icon} />
-                <input type="text" value={form.occupation_designation} onChange={(e) => set('occupation_designation', e.target.value)} className={inputClass()} />
-              </div>
-            </Field>
+            <IconTextInput
+  label="PAN Number"
+  hint="Optional, for 80G receipt"
+  error={errors.pan}
+  icon={FileText}
+  type="text"
+  placeholder="ABCDE1234F"
+  value={form.pan}
+  onChange={(e) => set('pan', e.target.value.toUpperCase())}
+  className={inputClass()}
+/>
+            <IconTextInput
+  label="Occupation & Designation"
+  error={errors.occupation_designation}
+  icon={Briefcase}
+  type="text"
+  placeholder="OCCUPATION & DESIGNATION"
+  value={form.occupation_designation}
+  onChange={(e) => set('occupation_designation', e.target.value)}
+  className={inputClass()}
+/>
           </div>
         </section>
 
@@ -316,18 +355,26 @@ export default function SocietyMembershipPage() {
         <section className="space-y-4">
           <SectionTitle>Introducing Member</SectionTitle>
           <div className="grid md:grid-cols-2 gap-4">
-            <Field label="Introducing Member Name">
-              <div className="relative">
-                <UserPlus className={icon} />
-                <input type="text" value={form.introducing_member_name} onChange={(e) => set('introducing_member_name', e.target.value)} className={inputClass()} />
-              </div>
-            </Field>
-            <Field label="Introducing Member Mobile Number">
-              <div className="relative">
-                <Phone className={icon} />
-                <input type="tel" value={form.introducing_member_mobile} onChange={(e) => set('introducing_member_mobile', e.target.value.replace(/\D/g, ''))} className={inputClass()} maxLength={10} />
-              </div>
-            </Field>
+            <IconTextInput
+  label="Introducing Member Name"
+  error={errors.introducing_member_name}
+  icon={UserPlus}
+  type="text"
+  placeholder="INTRODUCING MEMBER NAME"
+  value={form.introducing_member_name}
+  onChange={(e) => set('introducing_member_name', e.target.value)}
+  className={inputClass()}
+/>
+            <IconTextInput
+  label="Introducing Member Mobile Number"
+  error={errors.introducing_member_mobile}
+  icon={Phone}
+  type="tel"
+  placeholder="9876543210"
+  value={form.introducing_member_mobile}
+  onChange={(e) => set('introducing_member_mobile', e.target.value.replace(/\D/g, ''))}
+  className={inputClass()}
+/>
           </div>
         </section>
 
@@ -343,7 +390,6 @@ export default function SocietyMembershipPage() {
               <FileInput label="Spouse Photo" value={files.spouse_photo} onChange={(f) => setFiles((p) => ({ ...p, spouse_photo: f }))} accept="image/*" />
             </Field>
           </div>
-          <Camera className="hidden" />
         </section>
 
         {/* Documents */}
@@ -383,18 +429,26 @@ export default function SocietyMembershipPage() {
         <section className="space-y-4">
           <SectionTitle>Final</SectionTitle>
           <div className="grid md:grid-cols-2 gap-4">
-            <Field label="Place">
-              <div className="relative">
-                <Handshake className={icon} />
-                <input type="text" value={form.place} onChange={(e) => set('place', e.target.value)} className={inputClass()} placeholder="City" />
-              </div>
-            </Field>
-            <Field label="Member Signature" hint="Type your name as digital signature">
-              <div className="relative">
-                <PenLine className={icon} />
-                <input type="text" value={form.member_signature} onChange={(e) => set('member_signature', e.target.value.toUpperCase())} className={inputClass()} placeholder="Type full name" />
-              </div>
-            </Field>
+            <IconTextInput
+  label="Place"
+  error={errors.place}
+  icon={Handshake}
+  type="text"
+  placeholder="CITY"
+  value={form.place}
+  onChange={(e) => set('place', e.target.value)}
+  className={inputClass()}
+/>
+            <IconTextInput
+  label="Member Signature"
+  error={errors.member_signature}
+  icon={PenLine}
+  type="text"
+  placeholder="TYPE FULL NAME"
+  value={form.member_signature}
+  onChange={(e) => set('member_signature', e.target.value.toUpperCase())}
+  className={inputClass()}
+/>
           </div>
           <label className="flex items-start gap-2 text-sm text-gray-700 cursor-pointer">
             <input type="checkbox" checked={terms} onChange={(e) => setTerms(e.target.checked)} className="mt-1 accent-primary" />

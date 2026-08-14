@@ -1,7 +1,7 @@
 import { type ReactNode, type ChangeEvent } from 'react';
 
 export const inputBase =
-  'w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition';
+  'w-full pl-12 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition';
 
 export function inputClass(hasError?: boolean): string {
   return `${inputBase} ${hasError ? 'border-red-500' : 'border-gray-300'}`;
@@ -12,6 +12,59 @@ export function SectionTitle({ children }: { children: ReactNode }) {
     <h3 className="text-lg font-semibold text-primary border-b-2 border-primary/20 pb-2 pt-2">
       {children}
     </h3>
+  );
+}
+
+export function IconTextInput({
+  label,
+  required,
+  error,
+  icon,
+  type = 'text',
+  placeholder,
+  value,
+  onChange,
+  className extraClass = '',
+  asTextarea = false,
+}: {
+  label: string;
+  required?: boolean;
+  error?: string;
+  icon: string;
+  type?: string;
+  placeholder: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  className: string;
+  extraClass?: string;
+  asTextarea?: boolean;
+}) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
+      <div className="relative">
+        <icon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        {asTextarea ? (
+          <textarea
+            value={value}
+            onChange={onChange}
+            className={`${inputBase} ${extraClass} ${className}`}
+            placeholder={placeholder}
+          />
+        ) : (
+          <input
+            type={type}
+            value={value}
+            onChange={onChange}
+            className={`${inputBase} ${extraClass} ${className}`}
+            placeholder={placeholder}
+          />
+        )}
+      </div>
+      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+    </div>
   );
 }
 
@@ -52,12 +105,10 @@ export function FileInput({ label, required, value, onChange, accept }: FileInpu
   };
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">
-        {label}
-        {required && <span className="text-red-500"> *</span>}
-      </label>
       <input
         type="file"
+        aria-label={label}
+        aria-required={required}
         accept={accept}
         onChange={handle}
         className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary-dark transition"
