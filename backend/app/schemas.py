@@ -86,6 +86,150 @@ class SevaCreate(BaseModel):
         return v
 
 
+# ---- Society Membership (Form 1) ----
+# Fixed amount per membership type, in Rupees.
+SOCIETY_MEMBERSHIP_AMOUNTS: dict[str, float] = {
+    "partner": 551000.0,   # Partner Member
+    "founder": 111000.0,   # Founder Member (Voting Right)
+    "life": 73000.0,       # Life Member
+    "general": 31000.0,    # General Member
+    "advisor": 251000.0,   # Advisor
+}
+
+DAINIK_SEWA_ONE_TIME_AMOUNT: float = 2100.0   # One-time membership (₹2,100)
+DAINIK_SEWA_RECURRING_AMOUNT: float = 200.0   # Recurring ₹200/month
+
+
+class SocietyMembershipCreate(BaseModel):
+    membership_type: str
+    name: str = Field(min_length=2, max_length=120)
+    father_husband_name: str | None = Field(default=None, max_length=120)
+    gotra: str | None = Field(default=None, max_length=120)
+    dob: str | None = Field(default=None, max_length=20)
+    blood_group: str | None = Field(default=None, max_length=20)
+    residence_address: str | None = Field(default=None, max_length=1000)
+    office_address: str | None = Field(default=None, max_length=1000)
+    residence_telephone: str | None = Field(default=None, max_length=30)
+    office_telephone: str | None = Field(default=None, max_length=30)
+    mobile: str
+    fax: str | None = Field(default=None, max_length=30)
+    email: EmailStr
+    pan: str | None = None
+    occupation_designation: str | None = Field(default=None, max_length=160)
+    introducing_member_name: str | None = Field(default=None, max_length=120)
+    introducing_member_mobile: str | None = Field(default=None, max_length=20)
+    member_photo: str | None = Field(default=None, max_length=120)
+    spouse_photo: str | None = Field(default=None, max_length=120)
+    pan_document: str | None = Field(default=None, max_length=120)
+    aadhaar_document: str | None = Field(default=None, max_length=120)
+    payment_method: str = Field(default="online", max_length=40)
+    cheque_dd_number: str | None = Field(default=None, max_length=80)
+    payment_date: str | None = Field(default=None, max_length=40)
+    bank_drawn_on: str | None = Field(default=None, max_length=160)
+    amount_in_words: str | None = Field(default=None, max_length=255)
+    transaction_ref: str | None = Field(default=None, max_length=160)
+    place: str | None = Field(default=None, max_length=160)
+    member_signature: str | None = Field(default=None, max_length=160)
+    terms_accepted: bool = Field(default=True)
+
+    @field_validator("membership_type")
+    @classmethod
+    def validate_membership_type(cls, v: str) -> str:
+        if v not in SOCIETY_MEMBERSHIP_AMOUNTS:
+            raise ValueError("Invalid membership type")
+        return v
+
+    @field_validator("mobile")
+    @classmethod
+    def validate_mobile(cls, v: str) -> str:
+        v = v.strip()
+        if not PHONE_RE.match(v):
+            raise ValueError("Enter a valid 10-digit Indian mobile number")
+        return v
+
+    @field_validator("pan")
+    @classmethod
+    def validate_pan(cls, v: str | None) -> str | None:
+        if v in (None, ""):
+            return None
+        v = v.strip().upper()
+        if not PAN_RE.match(v):
+            raise ValueError("Enter a valid PAN (e.g. ABCDE1234F)")
+        return v
+
+
+class DainikSewaCreate(BaseModel):
+    name: str = Field(min_length=2, max_length=120)
+    gotra: str | None = Field(default=None, max_length=120)
+    father_name: str | None = Field(default=None, max_length=120)
+    spouse_name: str | None = Field(default=None, max_length=120)
+    office_address: str | None = Field(default=None, max_length=1000)
+    residence_address: str | None = Field(default=None, max_length=1000)
+    email: EmailStr
+    office_telephone: str | None = Field(default=None, max_length=30)
+    residence_telephone: str | None = Field(default=None, max_length=30)
+    mobile: str
+    self_profession: str | None = Field(default=None, max_length=160)
+    spouse_profession: str | None = Field(default=None, max_length=160)
+    self_dob: str | None = Field(default=None, max_length=20)
+    spouse_dob: str | None = Field(default=None, max_length=20)
+    marriage_anniversary: str | None = Field(default=None, max_length=20)
+    child1_name: str | None = Field(default=None, max_length=120)
+    child1_birthday: str | None = Field(default=None, max_length=20)
+    child2_name: str | None = Field(default=None, max_length=120)
+    child2_birthday: str | None = Field(default=None, max_length=20)
+    child3_name: str | None = Field(default=None, max_length=120)
+    child3_birthday: str | None = Field(default=None, max_length=20)
+    self_blood_group: str | None = Field(default=None, max_length=20)
+    spouse_blood_group: str | None = Field(default=None, max_length=20)
+    temple_contribution: str | None = Field(default=None, max_length=2000)
+    photo: str | None = Field(default=None, max_length=120)
+    consent: bool = Field(default=False)
+    applicant_signature: str | None = Field(default=None, max_length=160)
+    payment_method: str = Field(default="online", max_length=40)
+    cheque_dd_number: str | None = Field(default=None, max_length=80)
+    payment_date: str | None = Field(default=None, max_length=40)
+    bank_drawn_on: str | None = Field(default=None, max_length=160)
+    amount_in_words: str | None = Field(default=None, max_length=255)
+    transaction_ref: str | None = Field(default=None, max_length=160)
+    recurring_consent: bool = Field(default=False)
+    auto_payment_consent: bool = Field(default=False)
+    recurring_payment_method: str | None = Field(default=None, max_length=40)
+    recurring_start_date: str | None = Field(default=None, max_length=40)
+    recurring_ref_id: str | None = Field(default=None, max_length=160)
+    place: str | None = Field(default=None, max_length=160)
+
+    @field_validator("mobile")
+    @classmethod
+    def validate_mobile(cls, v: str) -> str:
+        v = v.strip()
+        if not PHONE_RE.match(v):
+            raise ValueError("Enter a valid 10-digit Indian mobile number")
+        return v
+
+
+class MembershipOrderOut(BaseModel):
+    id: str
+    razorpay_order_id: str | None
+    razorpay_subscription_id: str | None
+    amount: float
+    status: str
+
+
+class MembershipVerify(BaseModel):
+    form_id: str
+    razorpay_order_id: str
+    razorpay_payment_id: str
+    razorpay_signature: str
+
+
+class SubscriptionVerify(BaseModel):
+    form_id: str
+    razorpay_subscription_id: str
+    razorpay_payment_id: str
+    razorpay_signature: str
+
+
 class BlogPostOut(BaseModel):
     id: str
     title: str

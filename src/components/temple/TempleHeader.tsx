@@ -23,8 +23,8 @@ const navItems = [
   { label: 'Night Prasad Sewan', href: '/?post_type=product&p=2515' }]
 
 },
-{ label: 'Membership', href: '/membership' },
-{ label: 'Book a Seva', href: '/seva' },
+{ label: 'Society Membership', href: '/membership' },
+  { label: 'Dainik Sewa', href: '/seva' },
 { label: 'Live Darshan', href: '/live-darshan' },
 { label: 'Events / Rath Yatra', href: '/rath-yatra' },
 { label: 'Gallery', href: '/gallery' },

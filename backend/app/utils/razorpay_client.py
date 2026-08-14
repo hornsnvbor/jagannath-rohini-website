@@ -46,3 +46,57 @@ def verify_webhook_signature(raw_body: bytes, received_signature: str) -> bool:
         hashlib.sha256,
     ).hexdigest()
     return hmac.compare_digest(expected, received_signature)
+
+
+# ---------------------------------------------------------------------------
+# Subscriptions (recurring Dainik Sewa). A monthly plan is created once and
+# cached; subsequent subscriptions reuse it.
+# ---------------------------------------------------------------------------
+_dainik_plan_id: str | None = None
+
+
+def _get_dainik_plan_id() -> str:
+    global _dainik_plan_id
+    if settings.DAINIK_SEWA_PLAN_ID:
+        return settings.DAINIK_SEWA_PLAN_ID
+    if _dainik_plan_id:
+        return _dainik_plan_id
+    plan = client.plan.create({
+        "period": "monthly",
+        "interval": 1,
+        "item": {
+            "name": "Dainik Sewa – ₹200/month",
+            "amount": 20000,  # ₹200.00 in paise
+            "currency": "INR",
+        },
+        "notes": {"purpose": "Recurring Dainik Sewa Membership"},
+    })
+    _dainik_plan_id = plan["id"]
+    return _dainik_plan_id
+
+
+def create_dainik_subscription(notes: dict, email: str, contact: str, total_count: int = 12) -> dict:
+    """Create a recurring ₹200/month subscription for the Dainik Sewa form.
+    Returns the subscription dict (with an `id`) from Razorpay."""
+    return client.subscription.create({
+        "plan_id": _get_dainik_plan_id(),
+        "total_count": total_count,
+        "quantity": 1,
+        "customer_notify": 1,
+        "notes": notes,
+        "customer": {"email": email, "contact": contact},
+    })
+
+
+def verify_subscription_signature(subscription_id: str, payment_id: str, signature: str) -> bool:
+    """Verifies the checkout-side signature for a subscription setup payment
+    (Razorpay sends these back to the frontend)."""
+    try:
+        client.utility.verify_payment_signature({
+            "razorpay_subscription_id": subscription_id,
+            "razorpay_payment_id": payment_id,
+            "razorpay_signature": signature,
+        })
+        return True
+    except razorpay.errors.SignatureVerificationError:
+        return False

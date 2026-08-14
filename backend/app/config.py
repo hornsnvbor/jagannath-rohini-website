@@ -57,6 +57,15 @@ class Settings(BaseSettings):
     SMTP_PASS: str = ""
     SMTP_FROM: str = ""
 
+    # File uploads for membership forms (photos, PAN/Aadhaar docs). Validated by
+    # magic bytes and stored as bytea rows in the DATABASE (Postgres via
+    # Supabase in production). No local disk used, so uploads survive restarts.
+    MAX_UPLOAD_BYTES: int = 5 * 1024 * 1024  # 5 MB
+
+    # Optional: pre-created Razorpay plan id for the ₹200/month recurring
+    # Dainik Sewa subscription. If left empty a monthly plan is created once.
+    DAINIK_SEWA_PLAN_ID: str = ""
+
     # Frontend static build — set to the built `dist/` directory to have the
     # backend serve the SPA (single container / Docker deploy). Left empty in
     # dev where Vite serves the frontend on its own port.

@@ -5,7 +5,7 @@ interface FormPageShellProps {
   title: string;
   subtitle?: string;
   icon?: ReactNode;
-  children: ReactNode;
+  children?: ReactNode;
   success?: boolean;
   successMessage?: string;
 }

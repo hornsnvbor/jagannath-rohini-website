@@ -24,6 +24,10 @@ __pycache__/
 backend/temple.db
 *.sqlite3
 
+# Uploaded files (photos / ID proofs) — never commit user data
+backend/uploads/
+uploads/
+
 # Logs
 *.log
 npm-debug.log*

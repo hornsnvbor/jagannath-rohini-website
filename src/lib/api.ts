@@ -77,6 +77,139 @@ export interface PublicConfig {
 
 export const getPublicConfig = () => request<PublicConfig>('/api/config');
 
+/** Public Razorpay key id, fetched at runtime from the backend (falls back to
+ * a build-time env var for old setups). Safe — key id is public by design. */
+export async function getRazorpayPublicKey(): Promise<string> {
+  try {
+    const cfg = await getPublicConfig();
+    if (cfg.razorpay_key_id) return cfg.razorpay_key_id;
+  } catch {
+    // backend unreachable — fall through to env/build var
+  }
+  return import.meta.env.VITE_RAZORPAY_KEY_ID || '';
+}
+
+// ---- File uploads (membership forms) ----
+export const uploadFile = async (file: File): Promise<{ filename: string }> => {
+  const fd = new FormData();
+  fd.append('file', file);
+  const res = await fetch(`${API_BASE}/api/uploads`, { method: 'POST', body: fd });
+  if (!res.ok) {
+    let detail = 'Upload failed. Please try a smaller JPG/PNG/PDF file.';
+    try {
+      const body = await res.json();
+      detail = body.detail || detail;
+    } catch {
+      // ignore
+    }
+    throw new Error(detail);
+  }
+  return res.json();
+};
+
+export interface MembershipOrder {
+  id: string;
+  razorpay_order_id: string | null;
+  razorpay_subscription_id: string | null;
+  amount: number;
+  status: string;
+}
+
+// ---- Society Membership (Form 1) ----
+export interface SocietyMembershipPayload {
+  membership_type: string;
+  name: string;
+  father_husband_name?: string;
+  gotra?: string;
+  dob?: string;
+  blood_group?: string;
+  residence_address?: string;
+  office_address?: string;
+  residence_telephone?: string;
+  office_telephone?: string;
+  mobile: string;
+  fax?: string;
+  email: string;
+  pan?: string;
+  occupation_designation?: string;
+  introducing_member_name?: string;
+  introducing_member_mobile?: string;
+  member_photo?: string;
+  spouse_photo?: string;
+  pan_document?: string;
+  aadhaar_document?: string;
+  payment_method: string;
+  amount_in_words?: string;
+  place?: string;
+  member_signature?: string;
+  terms_accepted: boolean;
+}
+
+export const createSocietyOrder = (payload: SocietyMembershipPayload) =>
+  request<MembershipOrder>('/api/forms/society', { method: 'POST', body: JSON.stringify(payload) });
+
+export const verifySocietyPayment = (payload: {
+  form_id: string;
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+}) => request('/api/forms/society/verify', { method: 'POST', body: JSON.stringify(payload) });
+
+// ---- Dainik Sewa Membership (Form 2) ----
+export interface DainikSewaPayload {
+  name: string;
+  gotra?: string;
+  father_name?: string;
+  spouse_name?: string;
+  office_address?: string;
+  residence_address?: string;
+  email: string;
+  office_telephone?: string;
+  residence_telephone?: string;
+  mobile: string;
+  self_profession?: string;
+  spouse_profession?: string;
+  self_dob?: string;
+  spouse_dob?: string;
+  marriage_anniversary?: string;
+  child1_name?: string;
+  child1_birthday?: string;
+  child2_name?: string;
+  child2_birthday?: string;
+  child3_name?: string;
+  child3_birthday?: string;
+  self_blood_group?: string;
+  spouse_blood_group?: string;
+  temple_contribution?: string;
+  photo?: string;
+  consent: boolean;
+  applicant_signature?: string;
+  payment_method: string;
+  amount_in_words?: string;
+  recurring_consent: boolean;
+  auto_payment_consent: boolean;
+  recurring_payment_method?: string;
+  recurring_start_date?: string;
+  place?: string;
+}
+
+export const createDainikOrder = (payload: DainikSewaPayload) =>
+  request<MembershipOrder>('/api/forms/dainik', { method: 'POST', body: JSON.stringify(payload) });
+
+export const verifyDainikPayment = (payload: {
+  form_id: string;
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+}) => request('/api/forms/dainik/verify', { method: 'POST', body: JSON.stringify(payload) });
+
+export const verifyDainikSubscription = (payload: {
+  form_id: string;
+  razorpay_subscription_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+}) => request('/api/forms/dainik/subscription/verify', { method: 'POST', body: JSON.stringify(payload) });
+
 // ---- Forms ----
 export const submitMembership = (payload: {
   full_name: string;
