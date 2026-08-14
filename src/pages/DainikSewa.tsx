@@ -10,8 +10,9 @@ import { FormPageShell } from '../components/FormPageShell';
 import { numberToIndianWords } from '../lib/utils';
 import { Field, FileInput, SectionTitle, inputClass, IconTextInput } from '../components/membership/FormControls';
 
-const icon = 'absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400';
-const iconTextarea = 'absolute left-4 top-3 w-4 h-4 text-gray-400';
+const ONE_TIME_AMOUNT = 2100;
+const RECURRING_AMOUNT = 200;
+const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
 
 const initialForm = {
   name: '', gotra: '', father_name: '', spouse_name: '',

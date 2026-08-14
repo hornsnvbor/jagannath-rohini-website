@@ -10,6 +10,18 @@ import { FormPageShell } from '../components/FormPageShell';
 import { numberToIndianWords } from '../lib/utils';
 import { Field, FileInput, SectionTitle, inputClass, IconTextInput } from '../components/membership/FormControls';
 
+const MEMBERSHIP_TYPES: { value: string; label: string; amount: number }[] = [
+  { value: 'partner', label: 'Partner Member', amount: 551000 },
+  { value: 'founder', label: 'Founder Member (Voting Right)', amount: 111000 },
+  { value: 'life', label: 'Life Member', amount: 73000 },
+  { value: 'general', label: 'General Member', amount: 31000 },
+  { value: 'advisor', label: 'Advisor', amount: 251000 },
+];
+
+const AMOUNTS: Record<string, number> = Object.fromEntries(
+  MEMBERSHIP_TYPES.map((t) => [t.value, t.amount]),
+);
+
 const initialForm = {
   membership_type: 'general',
   name: '', father_husband_name: '', gotra: '', dob: '', blood_group: '',
