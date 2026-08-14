@@ -566,7 +566,6 @@ export default function DainikSewaPage() {
   className={inputClass()}
 />
         </section>
-        </section>
 
         <button
           type="submit"
