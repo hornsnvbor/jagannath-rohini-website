@@ -535,7 +535,6 @@ export default function DainikSewaPage() {
                 {errors.autoPayment && <p className="text-red-500 text-sm">{errors.autoPayment}</p>}
                 <IconTextInput
   label="Recurring Payment Start Date"
-  error={}
   icon={Calendar}
   type="date"
   placeholder="START DATE"
