@@ -24,7 +24,8 @@ export function IconTextInput({
   placeholder,
   value,
   onChange,
-  className extraClass = '',
+  className,
+  extraClass = '',
   asTextarea = false,
 }: {
   label: string;
