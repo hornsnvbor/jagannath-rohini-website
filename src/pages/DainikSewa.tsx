@@ -477,7 +477,6 @@ export default function DainikSewaPage() {
             <FileInput label="Recent Stamp-size Photo" required value={photo} onChange={setPhoto} accept="image/*" />
             {errors.photo && <p className="text-red-500 text-sm mt-1">{errors.photo}</p>}
           </Field>
-          <Camera className="hidden" />
         </section>
 
         {/* Consent */}
