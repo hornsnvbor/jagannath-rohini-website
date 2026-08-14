@@ -226,24 +226,36 @@ export default function DainikSewaPage() {
   onChange={(e) => set('name', e.target.value.toUpperCase())}
   className={inputClass(!!errors.name)}
 />
-            <Field label="Gotra">
-              <div className="relative">
-                <User className={icon} />
-                <input type="text" value={form.gotra} onChange={(e) => set('gotra', e.target.value)} className={inputClass()} />
-              </div>
-            </Field>
-            <Field label="Father Name">
-              <div className="relative">
-                <User className={icon} />
-                <input type="text" value={form.father_name} onChange={(e) => set('father_name', e.target.value)} className={inputClass()} />
-              </div>
-            </Field>
-            <Field label="Spouse Name">
-              <div className="relative">
-                <User className={icon} />
-                <input type="text" value={form.spouse_name} onChange={(e) => set('spouse_name', e.target.value)} className={inputClass()} />
-              </div>
-            </Field>
+            <IconTextInput
+  label="Gotra"
+  error={errors.gotra}
+  icon={User}
+  type="text"
+  placeholder="GOTRA"
+  value={form.gotra}
+  onChange={(e) => set('gotra', e.target.value)}
+  className={inputClass()}
+/>
+            <IconTextInput
+  label="Father Name"
+  error={errors.father_name}
+  icon={User}
+  type="text"
+  placeholder="FATHER NAME"
+  value={form.father_name}
+  onChange={(e) => set('father_name', e.target.value)}
+  className={inputClass()}
+/>
+            <IconTextInput
+  label="Spouse Name"
+  error={errors.spouse_name}
+  icon={User}
+  type="text"
+  placeholder="SPOUSE NAME"
+  value={form.spouse_name}
+  onChange={(e) => set('spouse_name', e.target.value)}
+  className={inputClass()}
+/>
           </div>
           <IconTextInput
   label="Office Address"
@@ -419,24 +431,26 @@ export default function DainikSewaPage() {
         <section className="space-y-4">
           <SectionTitle>Blood Group</SectionTitle>
           <div className="grid md:grid-cols-2 gap-4">
-            <Field label="Self Blood Group">
-              <div className="relative">
-                <HeartPulse className={icon} />
-                <select value={form.self_blood_group} onChange={(e) => set('self_blood_group', e.target.value)} className={inputClass()}>
-                  <option value="">Select</option>
-                  {BLOOD_GROUPS.map((b) => <option key={b} value={b}>{b}</option>)}
-                </select>
-              </div>
-            </Field>
-            <Field label="Spouse Blood Group">
-              <div className="relative">
-                <HeartPulse className={icon} />
-                <select value={form.spouse_blood_group} onChange={(e) => set('spouse_blood_group', e.target.value)} className={inputClass()}>
-                  <option value="">Select</option>
-                  {BLOOD_GROUPS.map((b) => <option key={b} value={b}>{b}</option>)}
-                </select>
-              </div>
-            </Field>
+            <IconTextInput
+  label="Self Blood Group"
+  error={errors.self_blood_group}
+  icon={HeartPulse}
+  type="select"
+  placeholder="SELECT BLOOD GROUP"
+  value={form.self_blood_group}
+  onChange={(e) => set('self_blood_group', e.target.value)}
+  className={inputClass()}
+/>
+            <IconTextInput
+  label="Spouse Blood Group"
+  error={errors.spouse_blood_group}
+  icon={HeartPulse}
+  type="select"
+  placeholder="SELECT BLOOD GROUP"
+  value={form.spouse_blood_group}
+  onChange={(e) => set('spouse_blood_group', e.target.value)}
+  className={inputClass()}
+/>
           </div>
         </section>
 
@@ -519,12 +533,16 @@ export default function DainikSewaPage() {
                   <span>Authorize recurring auto-payment (auto-debit) of ₹{RECURRING_AMOUNT}/month via UPI / Card for Dainik Sewa.</span>
                 </label>
                 {errors.autoPayment && <p className="text-red-500 text-sm">{errors.autoPayment}</p>}
-                <Field label="Recurring Payment Start Date">
-                  <div className="relative">
-                    <Calendar className={icon} />
-                    <input type="date" value={recurringStartDate} onChange={(e) => setRecurringStartDate(e.target.value)} className={inputClass()} />
-                  </div>
-                </Field>
+                <IconTextInput
+  label="Recurring Payment Start Date"
+  error={}
+  icon={Calendar}
+  type="date"
+  placeholder="START DATE"
+  value={recurringStartDate}
+  onChange={(e) => setRecurringStartDate(e.target.value)}
+  className={inputClass()}
+/>
                 <p className="text-xs text-gray-400">
                   On the next step you'll securely authorize the monthly auto-debit via Razorpay. You can cancel anytime.
                 </p>
@@ -538,12 +556,17 @@ export default function DainikSewaPage() {
         {/* Final */}
         <section className="space-y-4">
           <SectionTitle>Final</SectionTitle>
-          <Field label="Place">
-            <div className="relative">
-              <Home className={icon} />
-              <input type="text" value={form.place} onChange={(e) => set('place', e.target.value)} className={inputClass()} placeholder="City" />
-            </div>
-          </Field>
+          <IconTextInput
+  label="Place"
+  error={errors.place}
+  icon={Home}
+  type="text"
+  placeholder="CITY"
+  value={form.place}
+  onChange={(e) => set('place', e.target.value)}
+  className={inputClass()}
+/>
+        </section>
         </section>
 
         <button
