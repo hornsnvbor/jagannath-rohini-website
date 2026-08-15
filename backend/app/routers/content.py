@@ -125,6 +125,58 @@ def public_settings(db: Session = Depends(get_db)):
 
 
 # ---------------------------------------------------------------------------
+# Editable site content blocks (hero slides, videos, blog cards, beshas,
+# footer, header contact, content pages). The frontend ships hardcoded
+# defaults; admin overrides are stored here (JSON) and the frontend falls
+# back to its defaults for any block that isn't saved yet.
+# ---------------------------------------------------------------------------
+
+CONTENT_BLOCK_KEYS = (
+    "hero_slides",
+    "featured_videos",
+    "blog_cards",
+    "beshas",
+    "footer",
+    "header_contact",
+    "content_pages",
+)
+
+
+@router.get("/api/site/content")
+def site_content(db: Session = Depends(get_db)):
+    """Return every admin-saved content block (public — this is site content,
+    not secrets). Blocks that were never saved simply won't be present and the
+    frontend keeps using its hardcoded defaults for them."""
+    out: dict = {}
+    for key in CONTENT_BLOCK_KEYS:
+        raw = _get_setting(db, f"content.{key}")
+        if raw:
+            try:
+                out[key] = json.loads(raw)
+            except Exception:
+                continue
+    return out
+
+
+@router.put("/api/admin/site/content")
+def update_site_content(
+    payload: dict,
+    db: Session = Depends(get_db),
+    admin: str = Depends(require_admin),
+):
+    """Save one or more content blocks (admin only). Each key must be a known
+    block; values are stored as JSON and returned back."""
+    unknown = [k for k in payload if k not in CONTENT_BLOCK_KEYS]
+    if unknown:
+        raise HTTPException(status_code=400, detail=f"Unknown content block(s): {', '.join(unknown)}")
+    for key, value in payload.items():
+        if value is None:
+            continue
+        _set_setting(db, f"content.{key}", json.dumps(value))
+    return site_content(db)
+
+
+# ---------------------------------------------------------------------------
 # Admin endpoints (all protected by require_admin)
 # ---------------------------------------------------------------------------
 

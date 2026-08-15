@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Facebook, Instagram, Youtube, Twitter } from 'lucide-react';
+import { useSiteContent, type FooterContent } from '@/lib/siteContent';
 
 const tags = [
 { label: 'Car Festival', href: '/blog' },
@@ -14,6 +15,7 @@ const tags = [
 
 
 export default function TempleFooter() {
+  const footer = useSiteContent<FooterContent>('footer');
   return (
     <footer>
       {/* Main footer */}
@@ -63,32 +65,25 @@ export default function TempleFooter() {
               The Jagannath Mandir, Rohini presents an excellent architecture, with exquisite carvings and lovely wall
               paintings (Patta Chitra). A two-storied structure, the Temple's Ground Floor is where Goddess Mausi Maa
               is worshipped.
-            </p>
-            <div className="text-sm text-white/70 space-y-1">
+            </p>            <div className="text-sm text-white/70 space-y-1">
               <p className="font-semibold text-white">Mailing Address:</p>
-              <p>A 3/16, Rohini Sector 7, New Delhi 110085</p>
-              <p className="mt-2"><span className="text-primary">Email:</span> info@<a href="mailto:neelachalasevasangha@rediffmail.com" className="hover:text-primary transition break-all">jagannathmandirrohini.com</a>
-
-
-
-
+              <p>{footer.address}</p>
+              <p className="mt-2">
+                <span className="text-primary">Email:</span>{' '}
+                <a href={`mailto:${footer.email}`} className="hover:text-primary transition break-all">{footer.email}</a>
               </p>
               <p>
-                <a href="mailto:neelachalasangha@gmail.com" className="hover:text-primary transition break-all">odiasamajrohini@gmail.com
-
-                </a>
+                <a href={`mailto:${footer.email2}`} className="hover:text-primary transition break-all">{footer.email2}</a>
               </p>
-              <p className="mt-2"><span className="text-primary">Prasad Booking:</span> <a href="tel:+919810848952" className="hover:text-primary transition">+91 </a>7011510512
-
-
-
-
+              <p className="mt-2">
+                <span className="text-primary">Prasad Booking:</span>{' '}
+                <a href={`tel:+91${footer.prasadPhone}`} className="hover:text-primary transition">{footer.prasadPhone}</a>
               </p>
               <p>
                 <span className="text-primary">Phone:</span>{' '}
-                <a href="tel:01146015314" className="hover:text-primary transition">011-46015314</a>
+                <a href={`tel:${footer.phone1.replace(/-/g, '')}`} className="hover:text-primary transition">{footer.phone1}</a>
                 ,{' '}
-                <a href="tel:01146015316" className="hover:text-primary transition">46015316</a>
+                <a href={`tel:${footer.phone2.replace(/-/g, '')}`} className="hover:text-primary transition">{footer.phone2}</a>
               </p>
             </div>
           </div>
@@ -157,10 +152,7 @@ export default function TempleFooter() {
       {/* Notice bar */}
       <div className="bg-primary py-3 px-4">
         <p className="text-primary-foreground text-xs text-center max-w-5xl mx-auto leading-relaxed">
-          Dear Devotee, For unsuccessful orders we will share the QR code on your Whatsapp number to complete the
-          transaction. Closing Time on Website for Day Prasad Booking 9:30 am and closing time for Night Prasad
-          Booking 6:00 p.m. Our Whatsapp Agent will answer your queries between 9 a.m. to 10 a.m. and 5 p.m. to 6
-          p.m. <strong>Jai Jagannath 🙏</strong>
+          {footer.notice}
         </p>
       </div>
     </footer>);

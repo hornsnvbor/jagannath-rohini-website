@@ -366,6 +366,13 @@ export const getSiteSettings = () => request<SiteSettings>('/api/site/settings')
 export const updateSiteSettings = (payload: Partial<SiteSettings>) =>
   authRequest<SiteSettings>('/api/admin/site/settings', { method: 'PUT', body: JSON.stringify(payload) });
 
+// ---- Editable site content blocks (hero slides / videos / blog cards /
+// beshas / footer / header contact / content pages). Public site reads the
+// saved overrides and falls back to its hardcoded defaults for unsaved blocks.
+export const getSiteContent = () => request<Record<string, unknown>>('/api/site/content');
+export const updateSiteContent = (blocks: Record<string, unknown>) =>
+  authRequest<Record<string, unknown>>('/api/admin/site/content', { method: 'PUT', body: JSON.stringify(blocks) });
+
 // ---- Admin logo upload ----
 export const uploadLogo = (file: File) => {
   const fd = new FormData();

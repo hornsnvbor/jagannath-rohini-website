@@ -1,30 +1,8 @@
 import { Link } from 'react-router-dom';
-
-const posts = [
-  {
-    title: 'Ganpati Bappa Morya',
-    excerpt:
-      'Vakratuṇḍa mahākāya sūryakoṭi samaprabha | Nirvighnaṃ kuru me deva sarvakāryeṣu sarvadā || Ganesh Chaturthi is one of the most celebrated Hindu festivals…',
-    image: '/airo-assets/images/blog/ganesh-chaturthi.jpg',
-    href: '/blog/ganpati-bappa-morya',
-  },
-  {
-    title: 'II Oṃ śrī kṛṣṇāya namaḥ II',
-    excerpt:
-      'Every time, when goodness is suppressed by evil, when people are subjected to atrocities, the divine incarnates to restore dharma and protect the righteous…',
-    image: '/airo-assets/images/blog/krishna-janmashtami.jpg',
-    href: '/blog/om-sri-krishnaya-namah',
-  },
-  {
-    title: 'Balabhadra Janma',
-    excerpt:
-      "The full moon day in the month of Sravana also known as 'Sravana Purnima' marks the auspicious birth anniversary of Lord Balabhadra, the elder brother of Lord Jagannath…",
-    image: '/airo-assets/images/blog/balabhadra-janma.jpg',
-    href: '/blog/balabhadra-janma',
-  },
-];
+import { useSiteContent, type BlogCard } from '@/lib/siteContent';
 
 export default function BlogSection() {
+  const posts = useSiteContent<BlogCard[]>('blog_cards');
   return (
     <section className="py-12 px-4 bg-background">
       <div className="max-w-7xl mx-auto">

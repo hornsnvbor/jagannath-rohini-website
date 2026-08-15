@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import { CONTENT_PAGES } from '../content/contentPages';
+import { useSiteContent, type ContentPages } from '../lib/siteContent';
 import NotFoundPage from './NotFound';
 
 interface ContentPageProps {
@@ -12,7 +13,10 @@ interface ContentPageProps {
 export default function ContentPage({ slug: propSlug }: ContentPageProps) {
   const { slug: paramSlug } = useParams<{ slug: string }>();
   const slug = propSlug || paramSlug;
-  const page = CONTENT_PAGES[slug as string];
+  // Admin-saved page overrides win; everything else keeps the built-in content.
+  const savedPages = useSiteContent<ContentPages>('content_pages');
+  const pages = { ...CONTENT_PAGES, ...(savedPages || {}) };
+  const page = pages[slug as string];
 
   if (!page) return <NotFoundPage />;
 

@@ -2,39 +2,11 @@ import { useRef } from 'react';
 import Autoplay from 'embla-carousel-autoplay';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Link } from 'react-router-dom';
-
-const slides = [
-{
-  id: 1,
-  image: '/airo-assets/images/hero/slide-1-rath-yatra.jpg',
-  headline: 'SREE JAGANNATH RATHA YATRA 2026',
-  subtext: 'Ratha Yatra on 16-07-2026 (Thursday)',
-  location: 'JAGANNATH TEMPLE, ROHINI, NEW DELHI',
-  cta: { label: 'Donate Now', href: '/prasad-booking' }
-},
-{
-  id: 2,
-  image: '/airo-assets/images/hero/slide-2-annadaan.jpg',
-  headline: 'Maha Annadaan — Narayan Seva',
-  subtext: 'Prasad Sewan — Rs. 11,000 for 100 persons | Rs. 5,500 for 50 persons',
-  cta: { label: 'Donate Now', href: '/prasad-booking' }
-},
-{
-  id: 3,
-  image: '/airo-assets/images/hero/slide-3-celebration.jpg',
-  headline: 'Divine celebrations at Jagannath Mandir, Rohini!',
-  subtext: 'Feel the bliss of the sacred Shree Jagannath Rath Yatra 🛕',
-  cta: { label: 'Click Here', href: '/rath-yatra' }
-},
-{ id: 4, image: '/airo-assets/images/hero/slide-4-deity.jpg' },
-{ id: 5, image: '/airo-assets/images/hero/slide-5-aarti.jpg' },
-{ id: 6, image: '/airo-assets/images/hero/slide-6-rathyatra-crowd.jpg' },
-{ id: 7, image: '/airo-assets/images/hero/slide-7-deities.jpg' },
-{ id: 8, image: '/airo-assets/images/hero/slide-8-devotees.jpg' }];
-
+import { useSiteContent, type HeroSlide } from '@/lib/siteContent';
 
 export default function HeroCarousel() {
   const autoplay = useRef(Autoplay({ delay: 5000, stopOnInteraction: false }));
+  const slides = useSiteContent<HeroSlide[]>('hero_slides');
 
   return (
     <section>

@@ -1,30 +1,8 @@
 import { Link } from 'react-router-dom';
-
-const beshas = [
-  {
-    title: 'Bana Bhoji Besha',
-    excerpt:
-      'Lord Jagannatha has been identified with Krishna and most of the rituals performed in Sreemandir are based on the life of Krishna. The Bana Bhoji Besha is one of the most elaborate and visually stunning costumes…',
-    image: '/airo-assets/images/besha/bana-bhoji.jpg',
-    href: '/blog',
-  },
-  {
-    title: 'Suna Besha',
-    excerpt:
-      'The Suna Besha is also known as the Raja Besha or the Rajarajeshwara Besha. It is one of the most spectacular and grand Beshas of Lord Jagannath, performed on special occasions with gold ornaments…',
-    image: '/airo-assets/images/besha/suna-besha.jpg',
-    href: '/blog',
-  },
-  {
-    title: 'Tahiya Lagi Besha',
-    excerpt:
-      'The Tahiya Lagi Besha is performed during the Rath Yatra festival. Tahiya is a floral crown made of flowers and leaves, symbolizing the divine connection between nature and the deity…',
-    image: '/airo-assets/images/besha/tahiya-lagi.jpg',
-    href: '/blog',
-  },
-];
+import { useSiteContent, type BeshaCard } from '@/lib/siteContent';
 
 export default function BeshasSection() {
+  const beshas = useSiteContent<BeshaCard[]>('beshas');
   return (
     <section className="py-12 px-4 bg-muted">
       <div className="max-w-7xl mx-auto">

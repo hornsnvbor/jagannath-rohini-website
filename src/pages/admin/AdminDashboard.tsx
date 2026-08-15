@@ -4,17 +4,19 @@ import {
   LayoutDashboard, Users, Image, Megaphone, FileText, Video, LogOut,
   Plus, Trash2, RefreshCw, ChevronDown, ChevronUp, CheckCircle, Upload, Eye,
   Palette, ChevronRight, Phone, Mail, MapPin, User, BadgeCheck, FileDown, Edit2,
+  FileCode2,
 } from 'lucide-react';
 import {
   adminLogout, deleteAnnouncement, deleteBlogPost, deleteDocument, deleteGalleryItem,
   getAnnouncements, getBlogPosts, getDainikSubmissions, getDocuments, getGalleryItems,
-  getSiteSettings, getSocietySubmissions, createAnnouncement, createBlogPost,
-  updateBlogPost, uploadDocument, uploadGalleryItem, updateSiteSettings, uploadLogo,
+  getSiteSettings, getSiteContent, getSocietySubmissions, createAnnouncement, createBlogPost,
+  updateBlogPost, updateSiteContent, uploadDocument, uploadGalleryItem, updateSiteSettings, uploadLogo,
   type Announcement, type BlogPost, type DocumentItem, type GalleryItem,
   type SiteSettings, type SocietyMembershipRow, type DainikSewaRow,
 } from '../../lib/api';
+import { DEFAULT_SITE_CONTENT, CONTENT_BLOCK_LABELS, refreshSiteContent } from '../../lib/siteContent';
 
-type Tab = 'membership' | 'seva' | 'gallery' | 'announcements' | 'documents' | 'live' | 'branding' | 'blog';
+type Tab = 'membership' | 'seva' | 'gallery' | 'announcements' | 'documents' | 'live' | 'branding' | 'blog' | 'content';
 
 const TABS: { id: Tab; label: string; icon: typeof Users }[] = [
   { id: 'membership', label: 'Membership', icon: BadgeCheck },
@@ -25,6 +27,7 @@ const TABS: { id: Tab; label: string; icon: typeof Users }[] = [
   { id: 'live', label: 'Live & Timings', icon: Video },
   { id: 'branding', label: 'Logo & Branding', icon: Palette },
   { id: 'blog', label: 'Blog', icon: Megaphone },
+  { id: 'content', label: 'Site Content', icon: FileCode2 },
 ];
 
 function SectionCard({ title, badge, children, delay = 0 }: { title: string; badge?: string; children: React.ReactNode; delay?: number }) {
@@ -336,6 +339,11 @@ export default function AdminDashboard() {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoUrl, setLogoUrl] = useState('');
 
+  // site content (the site ships with hardcoded defaults; admin can override
+  // any block here and the public pages pick it up)
+  const [contentBlockKey, setContentBlockKey] = useState<string>('hero_slides');
+  const [contentDrafts, setContentDrafts] = useState<Record<string, string>>({});
+
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState('');
 
@@ -398,6 +406,24 @@ export default function AdminDashboard() {
       setLoading(false);
     })();
   }, [refreshSubmissions, refreshGallery, refreshAnnouncements, refreshDocuments, refreshSettings, fetchBlogPosts]);
+
+  // Load current effective site content (admin override, else built-in default)
+  useEffect(() => {
+    (async () => {
+      let saved: Record<string, unknown> = {};
+      try {
+        saved = await getSiteContent();
+      } catch {
+        // backend down — fall back to pure defaults below
+      }
+      const drafts: Record<string, string> = {};
+      for (const key of Object.keys(CONTENT_BLOCK_LABELS)) {
+        const value = key in saved ? saved[key] : DEFAULT_SITE_CONTENT[key];
+        drafts[key] = JSON.stringify(value ?? null, null, 2);
+      }
+      setContentDrafts(drafts);
+    })();
+  }, []);
 
   const handleUploadGallery = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -519,6 +545,26 @@ export default function AdminDashboard() {
       const s = await updateSiteSettings({ under_construction: !settings.under_construction });
       setSettings(s);
       flash('Saved');
+    } catch (err: any) {
+      alert(err.message || 'Save failed');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleSaveContentBlock = async () => {
+    const raw = contentDrafts[contentBlockKey] ?? '';
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      return alert(`Invalid JSON in this block. Check the formatting and try again.`);
+    }
+    setBusy(true);
+    try {
+      await updateSiteContent({ [contentBlockKey]: parsed });
+      await refreshSiteContent();
+      flash(`Saved: ${CONTENT_BLOCK_LABELS[contentBlockKey]}`);
     } catch (err: any) {
       alert(err.message || 'Save failed');
     } finally {
@@ -940,6 +986,60 @@ export default function AdminDashboard() {
             <p className="text-xs text-muted-foreground anim-fade-in" style={{ animationDelay: '80ms' }}>
               Tip: Use the existing <code className="bg-gray-100 px-1 rounded">horizontal.png</code> style logo for the best fit. The logo scales up in the header and keeps transparency.
             </p>
+          </div>
+        )}
+
+        {tab === 'content' && (
+          <div className="space-y-6">
+            <SectionCard title="Site Content (optional admin override)" badge="Defaults used until saved">
+              <p className="text-sm text-muted-foreground mb-4">
+                The website ships with built-in content for every section below. Pick a block, edit the JSON,
+                and save only when you want to change it — until then the default is shown on the site.
+              </p>
+              <div className="space-y-4">
+                <div>
+                  <FieldLabel>Block</FieldLabel>
+                  <select
+                    className={inputCls}
+                    value={contentBlockKey}
+                    onChange={(e) => setContentBlockKey(e.target.value)}
+                  >
+                    {Object.entries(CONTENT_BLOCK_LABELS).map(([k, label]) => (
+                      <option key={k} value={k}>{label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <FieldLabel>JSON — {CONTENT_BLOCK_LABELS[contentBlockKey]}</FieldLabel>
+                  <textarea
+                    className={`${inputCls} font-mono text-xs leading-relaxed`}
+                    rows={18}
+                    value={contentDrafts[contentBlockKey] ?? ''}
+                    onChange={(e) => setContentDrafts((d) => ({ ...d, [contentBlockKey]: e.target.value }))}
+                    spellCheck={false}
+                  />
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <button onClick={handleSaveContentBlock} disabled={busy} className={fileBtnCls}>
+                    Save this block
+                  </button>
+                  <button
+                    onClick={() => {
+                      const value = DEFAULT_SITE_CONTENT[contentBlockKey];
+                      setContentDrafts((d) => ({ ...d, [contentBlockKey]: JSON.stringify(value ?? null, null, 2) }));
+                    }}
+                    className="px-4 py-2 border border-gray-300 text-sm rounded-lg hover:bg-gray-50 transition"
+                  >
+                    Reset to default
+                  </button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  For &quot;Content Pages&quot;: keys are page slugs (e.g. <code className="bg-gray-100 px-1 rounded">about-the-temple</code>,
+                  <code className="bg-gray-100 px-1 rounded">history</code>). Only the pages you include are overridden — the rest keep
+                  their built-in text. Other blocks replace the whole section when saved.
+                </p>
+              </div>
+            </SectionCard>
           </div>
         )}
       </main>

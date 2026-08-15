@@ -1,13 +1,7 @@
-const videos = [
-  'https://www.youtube.com/embed/rkgIdy9aQv4',
-  'https://www.youtube.com/embed/sB3hFY9xlMU',
-  'https://www.youtube.com/embed/kSJT8T_Z0SU',
-  'https://www.youtube.com/embed/I7YWww_REBU',
-  'https://www.youtube.com/embed/07gW2xUhOVc',
-  'https://www.youtube.com/embed/dMToh8Nh9pc',
-];
+import { useSiteContent } from '@/lib/siteContent';
 
 export default function FeaturedVideos() {
+  const videos = useSiteContent<string[]>('featured_videos');
   return (
     <section className="py-12 px-4 bg-muted">
       <div className="max-w-7xl mx-auto">
