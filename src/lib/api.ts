@@ -322,11 +322,19 @@ export interface SiteSettings {
   festivals: { name: string; date: string }[];
   under_construction: boolean;
   donate_banner: string;
+  logo_url: string;
 }
 
 export const getSiteSettings = () => request<SiteSettings>('/api/site/settings');
 export const updateSiteSettings = (payload: Partial<SiteSettings>) =>
   request<SiteSettings>('/api/admin/site/settings', { method: 'PUT', body: JSON.stringify(payload) });
+
+// ---- Admin logo upload ----
+export const uploadLogo = (file: File) => {
+  const fd = new FormData();
+  fd.append('file', file);
+  return request<{ logo_url: string; stored_name: string }>('/api/admin/logo', { method: 'POST', body: fd });
+};
 
 // ---- Admin gallery upload ----
 export const uploadGalleryItem = (title: string, category: string, file: File) => {

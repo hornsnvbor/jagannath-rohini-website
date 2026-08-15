@@ -2,17 +2,17 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Image, Megaphone, FileText, Video, LogOut,
-  Plus, Trash2, RefreshCw, ChevronDown, ChevronUp, CheckCircle, Upload, Eye,
+  Plus, Trash2, RefreshCw, ChevronDown, ChevronUp, CheckCircle, Upload, Eye, Palette,
 } from 'lucide-react';
 import {
   adminLogout, deleteAnnouncement, deleteDocument, deleteGalleryItem, getAdminMemberships,
   getAdminSeva, getAnnouncements, getDainikSubmissions, getDocuments, getGalleryItems,
   getSiteSettings, getSocietySubmissions, createAnnouncement, uploadDocument,
-  uploadGalleryItem, updateSiteSettings, type Announcement, type DocumentItem,
+  uploadGalleryItem, updateSiteSettings, uploadLogo, type Announcement, type DocumentItem,
   type GalleryItem, type SiteSettings, type SocietySubmission, type DainikSubmission,
 } from '../../lib/api';
 
-type Tab = 'submissions' | 'gallery' | 'announcements' | 'documents' | 'live';
+type Tab = 'submissions' | 'gallery' | 'announcements' | 'documents' | 'live' | 'branding';
 
 const TABS: { id: Tab; label: string; icon: typeof Users }[] = [
   { id: 'submissions', label: 'Submissions', icon: Users },
@@ -20,6 +20,7 @@ const TABS: { id: Tab; label: string; icon: typeof Users }[] = [
   { id: 'announcements', label: 'Announcements', icon: Megaphone },
   { id: 'documents', label: 'Documents', icon: FileText },
   { id: 'live', label: 'Live & Timings', icon: Video },
+  { id: 'branding', label: 'Logo & Branding', icon: Palette },
 ];
 
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
@@ -123,11 +124,15 @@ export default function AdminDashboard() {
 
   // live & timings
   const [settings, setSettings] = useState<SiteSettings>({
-    live_stream: '', timings: [], festivals: [], under_construction: false, donate_banner: '',
+    live_stream: '', timings: [], festivals: [], under_construction: false, donate_banner: '', logo_url: '',
   });
   const [liveInput, setLiveInput] = useState('');
   const [timingsInput, setTimingsInput] = useState('');
   const [festivalsInput, setFestivalsInput] = useState('');
+
+  // branding / logo
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoUrl, setLogoUrl] = useState('');
 
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState('');
@@ -169,6 +174,7 @@ export default function AdminDashboard() {
     try {
       const s = await getSiteSettings();
       setSettings(s);
+      setLogoUrl(s.logo_url || '');
       setLiveInput(s.live_stream || '');
       setTimingsInput((s.timings || []).map((t) => `${t.name}\t${t.time}`).join('\n'));
       setFestivalsInput((s.festivals || []).map((f) => `${f.name}\t${f.date}`).join('\n'));
@@ -226,6 +232,22 @@ export default function AdminDashboard() {
       setDTitle(''); setDFile(null);
       await refreshDocuments();
       flash('Document uploaded');
+    } catch (err: any) {
+      alert(err.message || 'Upload failed');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleUploadLogo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!logoFile) return alert('Please choose a logo image');
+    setBusy(true);
+    try {
+      const res = await uploadLogo(logoFile);
+      setLogoUrl(res.logo_url);
+      setLogoFile(null);
+      flash('Logo updated — it will appear on the site immediately');
     } catch (err: any) {
       alert(err.message || 'Upload failed');
     } finally {
@@ -584,6 +606,36 @@ export default function AdminDashboard() {
               </label>
               <p className="text-xs text-muted-foreground">The banner appears on the Donate page when enabled.</p>
             </SectionCard>
+          </div>
+        )}
+
+        {tab === 'branding' && (
+          <div className="space-y-6">
+            <SectionCard title="Header Logo">
+              <form onSubmit={handleUploadLogo} className="space-y-3">
+                {logoUrl && (
+                  <div className="mb-3">
+                    <p className="text-xs text-muted-foreground mb-2">Current logo (shown in the header):</p>
+                    <img src={logoUrl} alt="Current logo" className="h-16 w-auto object-contain border border-border rounded-lg p-1 bg-white" />
+                  </div>
+                )}
+                <div>
+                  <FieldLabel>Logo image (PNG/JPG/WebP with transparent background recommended)</FieldLabel>
+                  <input
+                    type="file" accept="image/*"
+                    onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
+                    className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white"
+                  />
+                  {logoFile && <p className="text-xs text-green-600 mt-1">Selected: {logoFile.name}</p>}
+                </div>
+                <button type="submit" disabled={busy} className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-lg disabled:opacity-50">
+                  <Upload className="w-4 h-4" /> Change Logo
+                </button>
+              </form>
+            </SectionCard>
+            <p className="text-xs text-muted-foreground">
+              Tip: Use the existing <code className="bg-gray-100 px-1 rounded">horizontal.png</code> style logo for the best fit. The logo scales up in the header and keeps transparency.
+            </p>
           </div>
         )}
       </main>

@@ -23,7 +23,7 @@ router = APIRouter(tags=["site-content"])
 
 ALLOWED_NAME = re.compile(r"[A-Za-z0-9]+\.[A-Za-z0-9]+")
 
-_SETTING_KEYS = ("live_stream", "timings", "festivals", "under_construction", "donate_banner")
+_SETTING_KEYS = ("live_stream", "timings", "festivals", "under_construction", "donate_banner", "logo_url")
 
 
 def _get_setting(db: Session, key: str) -> str:
@@ -54,6 +54,7 @@ def _public_settings(db: Session) -> SettingsOut:
         festivals=_as_list(_get_setting(db, "festivals")),
         under_construction=_get_setting(db, "under_construction").lower() in ("1", "true", "yes"),
         donate_banner=_get_setting(db, "donate_banner"),
+        logo_url=_get_setting(db, "logo_url"),
     )
 
 
@@ -221,4 +222,24 @@ def update_settings(payload: SettingsUpdate, db: Session = Depends(get_db), admi
         _set_setting(db, "under_construction", "1" if payload.under_construction else "0")
     if payload.donate_banner is not None:
         _set_setting(db, "donate_banner", payload.donate_banner)
+    if payload.logo_url is not None:
+        _set_setting(db, "logo_url", payload.logo_url)
     return _public_settings(db)
+
+
+@router.post("/api/admin/logo", response_model=dict, status_code=status.HTTP_201_CREATED)
+def upload_logo(
+    request: Request,
+    file: UploadFile | None = None,
+    db: Session = Depends(get_db),
+    admin: str = Depends(require_admin),
+):
+    """Upload a header logo (PNG/JPG/WebP/GIF). Stored as a public file and
+    referenced by the site-wide `logo_url` setting."""
+    if file is None:
+        raise HTTPException(status_code=400, detail="Image is required")
+    stored = _store_public_file(db, file)
+    db.flush()
+    logo_url = f"/api/files/{stored}"
+    _set_setting(db, "logo_url", logo_url)
+    return {"logo_url": logo_url, "stored_name": stored}

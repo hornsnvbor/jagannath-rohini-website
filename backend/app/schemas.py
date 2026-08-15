@@ -319,6 +319,7 @@ class SettingsOut(BaseModel):
     festivals: list[dict] = []     # [{"name": ..., "date": ...}]
     under_construction: bool = False
     donate_banner: str = ""
+    logo_url: str = ""             # admin-uploaded header logo (relative /api/files/...)
 
 
 class SettingsUpdate(BaseModel):
@@ -327,3 +328,4 @@ class SettingsUpdate(BaseModel):
     festivals: list[dict] | None = None
     under_construction: bool | None = None
     donate_banner: str | None = None
+    logo_url: str | None = None
