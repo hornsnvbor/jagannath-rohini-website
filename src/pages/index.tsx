@@ -4,6 +4,7 @@ import LiveAartiBanner from '@/components/temple/LiveAartiBanner';
 import FeaturedVideos from '@/components/temple/FeaturedVideos';
 import BlogSection from '@/components/temple/BlogSection';
 import BeshasSection from '@/components/temple/BeshasSection';
+import GallerySection from '@/components/temple/GallerySection';
 
 const site = 'https://jagannathmandirrohini.com';
 
@@ -78,6 +79,7 @@ export default function HomePage() {
         <FeaturedVideos />
         <BlogSection />
         <BeshasSection />
+        <GallerySection />
       </main>
     </>
   );

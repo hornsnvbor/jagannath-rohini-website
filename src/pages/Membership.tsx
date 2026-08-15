@@ -23,6 +23,8 @@ export default function MembershipPage() {
     if (!form.phone.match(/^[6-9]\d{9}$/)) err.phone = 'Valid 10-digit Indian mobile required';
     if (!form.email.match(/^\S+@\S+\.\S+$/)) err.email = 'Valid email required';
     if (!form.address.trim()) err.address = 'Address is required';
+    // PAN or Aadhaar mandatory for ID verification
+    if (!form.pan.trim() && !form.aadhaar.trim()) err.pan_aadhaar = 'Either PAN or Aadhaar number is required for ID verification';
     setErrors(err);
     return Object.keys(err).length === 0;
   };
@@ -102,6 +104,26 @@ export default function MembershipPage() {
   onChange={e => setForm({ ...form, address: e.target.value })}
   className="min-h-[80px]"
   asTextarea
+/>
+        <IconTextInput
+  label="PAN Number"
+  error={errors.pan_aadhaar}
+  icon={FileText}
+  type="text"
+  placeholder="ABCDE1234F"
+  value={form.pan}
+  onChange={e => setForm({ ...form, pan: e.target.value })}
+  className=""
+/>
+        <IconTextInput
+  label="Aadhaar Number"
+  error={}
+  icon={User}
+  type="text"
+  placeholder="123456789012"
+  value={form.aadhaar}
+  onChange={e => setForm({ ...form, aadhaar: e.target.value})}
+  className=""
 />
 
         <div className="grid md:grid-cols-2 gap-4">
