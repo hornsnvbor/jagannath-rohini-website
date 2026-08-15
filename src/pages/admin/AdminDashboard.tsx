@@ -2,20 +2,22 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Image, Megaphone, FileText, Video, LogOut,
-  Plus, Trash2, RefreshCw, ChevronDown, ChevronUp, CheckCircle, Upload, Eye, Palette,
+  Plus, Trash2, RefreshCw, ChevronDown, ChevronUp, CheckCircle, Upload, Eye,
+  Palette, ChevronRight, Phone, Mail, MapPin, User, BadgeCheck, FileDown,
 } from 'lucide-react';
 import {
-  adminLogout, deleteAnnouncement, deleteDocument, deleteGalleryItem, getAdminMemberships,
-  getAdminSeva, getAnnouncements, getDainikSubmissions, getDocuments, getGalleryItems,
+  adminLogout, deleteAnnouncement, deleteDocument, deleteGalleryItem,
+  getAnnouncements, getDainikSubmissions, getDocuments, getGalleryItems,
   getSiteSettings, getSocietySubmissions, createAnnouncement, uploadDocument,
   uploadGalleryItem, updateSiteSettings, uploadLogo, type Announcement, type DocumentItem,
   type GalleryItem, type SiteSettings, type SocietySubmission, type DainikSubmission,
 } from '../../lib/api';
 
-type Tab = 'submissions' | 'gallery' | 'announcements' | 'documents' | 'live' | 'branding';
+type Tab = 'membership' | 'seva' | 'gallery' | 'announcements' | 'documents' | 'live' | 'branding';
 
 const TABS: { id: Tab; label: string; icon: typeof Users }[] = [
-  { id: 'submissions', label: 'Submissions', icon: Users },
+  { id: 'membership', label: 'Membership', icon: BadgeCheck },
+  { id: 'seva', label: 'Seva', icon: Users },
   { id: 'gallery', label: 'Gallery', icon: Image },
   { id: 'announcements', label: 'Announcements', icon: Megaphone },
   { id: 'documents', label: 'Documents', icon: FileText },
@@ -23,13 +25,14 @@ const TABS: { id: Tab; label: string; icon: typeof Users }[] = [
   { id: 'branding', label: 'Logo & Branding', icon: Palette },
 ];
 
-function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
+function SectionCard({ title, badge, children, delay = 0 }: { title: string; badge?: string; children: React.ReactNode; delay?: number }) {
   return (
-    <div className="bg-white rounded-xl border border-border shadow-sm overflow-hidden">
-      <div className="px-4 py-3 border-b border-border bg-gray-50 flex items-center gap-2">
+    <div className="admin-card anim-fade-up bg-white rounded-xl border border-border shadow-sm overflow-hidden" style={{ animationDelay: `${delay}ms` }}>
+      <div className="px-5 py-3.5 border-b border-border bg-gradient-to-r from-gray-50 to-white flex items-center gap-2">
         <h3 className="font-semibold text-temple-dark">{title}</h3>
+        {badge && <span className="ml-auto text-xs font-medium bg-primary/15 text-primary-foreground text-temple-dark px-2.5 py-1 rounded-full">{badge}</span>}
       </div>
-      <div className="p-4">{children}</div>
+      <div className="p-5">{children}</div>
     </div>
   );
 }
@@ -38,54 +41,244 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
   return <label className="block text-sm font-medium text-gray-700 mb-1">{children}</label>;
 }
 
-function SubTable({ rows, columns }: { rows: Record<string, unknown>[]; columns: { key: string; label: string }[] }) {
-  const [openId, setOpenId] = useState<string | null>(null);
-  if (!rows.length) return <p className="text-sm text-muted-foreground">No submissions yet.</p>;
+function Field({ label, value }: { label: string; value?: unknown }) {
+  if (value === null || value === undefined || value === '' || value === false) return null;
   return (
-    <div className="overflow-x-auto">
+    <div className="anim-fade-in">
+      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className="text-sm font-medium text-gray-800 break-words">{typeof value === 'boolean' ? (value ? 'Yes' : 'No') : String(value)}</p>
+    </div>
+  );
+}
+
+function PhotoThumb({ name }: { name?: string }) {
+  if (!name) return null;
+  return (
+    <a
+      href={`/api/uploads/${name}`}
+      target="_blank"
+      rel="noreferrer"
+      className="group block w-24 h-24 rounded-lg border border-border overflow-hidden bg-gray-100 anim-pop"
+      title={`Open ${name}`}
+    >
+      <img src={`/api/uploads/${name}`} alt={name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" loading="lazy" />
+    </a>
+  );
+}
+
+function PhotosBlock({ photo, spousePhoto, panDoc, aadhaarDoc, signature }: { photo?: string; spousePhoto?: string; panDoc?: string; aadhaarDoc?: string; signature?: string }) {
+  const items = [
+    { n: photo, l: 'Photo' },
+    { n: spousePhoto, l: 'Spouse Photo' },
+    { n: panDoc, l: 'PAN Document' },
+    { n: aadhaarDoc, l: 'Aadhaar Document' },
+    { n: signature, l: 'Signature' },
+  ].filter((x) => x.n);
+  if (!items.length) return null;
+  return (
+    <div className="anim-fade-up">
+      <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-2">Uploaded Documents</p>
+      <div className="flex flex-wrap gap-3">
+        {items.map((it) => (
+          <div key={it.l}>
+            <PhotoThumb name={it.n} />
+            <p className="text-[10px] text-muted-foreground mt-1 text-center">{it.l}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DetailPanel({ title, children, icon }: { title: string; children: React.ReactNode; icon?: React.ReactNode }) {
+  return (
+    <div className="anim-slide-in">
+      <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-primary font-semibold mb-2">
+        {icon}{title}
+      </div>
+      <div className="grid sm:grid-cols-2 gap-x-6 gap-y-3">{children}</div>
+    </div>
+  );
+}
+
+function SocietyDetail({ row }: { row: SocietySubmission }) {
+  return (
+    <div className="space-y-5">
+      <DetailPanel title="Personal Details" icon={<User className="w-3.5 h-3.5" />}>
+        <Field label="Full Name" value={row.name} />
+        <Field label="Father / Husband" value={row.father_husband_name} />
+        <Field label="Gotra" value={row.gotra} />
+        <Field label="Date of Birth" value={row.dob} />
+        <Field label="Blood Group" value={row.blood_group} />
+        <Field label="Occupation" value={row.occupation_designation} />
+      </DetailPanel>
+      <DetailPanel title="Contact" icon={<Phone className="w-3.5 h-3.5" />}>
+        <Field label="Mobile" value={row.mobile} />
+        <Field label="Email" value={row.email} />
+        <Field label="Residence Phone" value={row.residence_telephone} />
+        <Field label="Office Phone" value={row.office_telephone} />
+        <Field label="Fax" value={row.fax} />
+        <Field label="Residence Address" value={row.residence_address} />
+        <Field label="Office Address" value={row.office_address} />
+      </DetailPanel>
+      <DetailPanel title="Membership" icon={<BadgeCheck className="w-3.5 h-3.5" />}>
+        <Field label="Membership Type" value={row.membership_type} />
+        <Field label="Membership Amount" value={row.membership_amount ? `₹${Number(row.membership_amount).toLocaleString('en-IN')}` : undefined} />
+        <Field label="Payment Method" value={row.payment_method} />
+        <Field label="Payment Status" value={row.payment_status} />
+        <Field label="Cheque / DD No" value={row.cheque_dd_number} />
+        <Field label="Bank Drawn On" value={row.bank_drawn_on} />
+        <Field label="Payment Date" value={row.payment_date} />
+        <Field label="Transaction Ref" value={row.transaction_ref} />
+        <Field label="Amount in Words" value={row.amount_in_words} />
+      </DetailPanel>
+      <DetailPanel title="Introducer & Others">
+        <Field label="Introducing Member" value={row.introducing_member_name} />
+        <Field label="Introducer Mobile" value={row.introducing_member_mobile} />
+        <Field label="PAN" value={row.pan} />
+        <Field label="Place" value={row.place} />
+        <Field label="Terms Accepted" value={row.terms_accepted} />
+        <Field label="Submitted" value={row.created_at ? new Date(row.created_at).toLocaleString('en-IN') : undefined} />
+      </DetailPanel>
+      <PhotosBlock
+        photo={row.member_photo as string}
+        spousePhoto={row.spouse_photo as string}
+        panDoc={row.pan_document as string}
+        aadhaarDoc={row.aadhaar_document as string}
+        signature={row.member_signature as string}
+      />
+    </div>
+  );
+}
+
+function DainikDetail({ row }: { row: DainikSubmission }) {
+  return (
+    <div className="space-y-5">
+      <DetailPanel title="Personal Details" icon={<User className="w-3.5 h-3.5" />}>
+        <Field label="Full Name" value={row.name} />
+        <Field label="Gotra" value={row.gotra} />
+        <Field label="Father Name" value={row.father_name} />
+        <Field label="Spouse Name" value={row.spouse_name} />
+        <Field label="Self Profession" value={row.self_profession} />
+        <Field label="Spouse Profession" value={row.spouse_profession} />
+        <Field label="Self DOB" value={row.self_dob} />
+        <Field label="Spouse DOB" value={row.spouse_dob} />
+        <Field label="Marriage Anniversary" value={row.marriage_anniversary} />
+        <Field label="Self Blood Group" value={row.self_blood_group} />
+        <Field label="Spouse Blood Group" value={row.spouse_blood_group} />
+      </DetailPanel>
+      <DetailPanel title="Contact & Addresses" icon={<Phone className="w-3.5 h-3.5" />}>
+        <Field label="Mobile" value={row.mobile} />
+        <Field label="Email" value={row.email} />
+        <Field label="Office Phone" value={row.office_telephone} />
+        <Field label="Residence Phone" value={row.residence_telephone} />
+        <Field label="Residence Address" value={row.residence_address} />
+        <Field label="Office Address" value={row.office_address} />
+      </DetailPanel>
+      <DetailPanel title="Children">
+        <Field label="Child 1" value={row.child1_name ? `${row.child1_name}${row.child1_birthday ? ` (${row.child1_birthday})` : ''}` : undefined} />
+        <Field label="Child 2" value={row.child2_name ? `${row.child2_name}${row.child2_birthday ? ` (${row.child2_birthday})` : ''}` : undefined} />
+        <Field label="Child 3" value={row.child3_name ? `${row.child3_name}${row.child3_birthday ? ` (${row.child3_birthday})` : ''}` : undefined} />
+      </DetailPanel>
+      <DetailPanel title="Dainik Sewa Details">
+        <Field label="Temple Contribution" value={row.temple_contribution} />
+        <Field label="One Time Amount" value={row.one_time_amount ? `₹${Number(row.one_time_amount).toLocaleString('en-IN')}` : undefined} />
+        <Field label="Payment Method" value={row.payment_method} />
+        <Field label="Payment Status" value={row.payment_status} />
+        <Field label="Cheque / DD No" value={row.cheque_dd_number} />
+        <Field label="Bank Drawn On" value={row.bank_drawn_on} />
+        <Field label="Payment Date" value={row.payment_date} />
+        <Field label="Transaction Ref" value={row.transaction_ref} />
+        <Field label="Amount in Words" value={row.amount_in_words} />
+      </DetailPanel>
+      <DetailPanel title="Recurring / Consent">
+        <Field label="Recurring Consent" value={row.recurring_consent} />
+        <Field label="Auto Payment Consent" value={row.auto_payment_consent} />
+        <Field label="Recurring Method" value={row.recurring_payment_method} />
+        <Field label="Recurring Start Date" value={row.recurring_start_date} />
+        <Field label="Recurring Ref ID" value={row.recurring_ref_id} />
+        <Field label="Consent Given" value={row.consent} />
+        <Field label="Place" value={row.place} />
+        <Field label="Submitted" value={row.created_at ? new Date(row.created_at).toLocaleString('en-IN') : undefined} />
+      </DetailPanel>
+      <PhotosBlock
+        photo={row.photo as string}
+        signature={row.applicant_signature as string}
+      />
+    </div>
+  );
+}
+
+function SubTable({ rows, columns, detail }: { rows: (SocietySubmission | DainikSubmission)[]; columns: { key: string; label: string }[]; detail: (r: any) => React.ReactNode }) {
+  const [openId, setOpenId] = useState<string | null>(null);
+  if (!rows.length) {
+    return (
+      <div className="py-10 text-center anim-fade-in">
+        <p className="text-sm text-muted-foreground">No submissions yet. Once someone fills the form, it appears here.</p>
+      </div>
+    );
+  }
+  return (
+    <div className="overflow-x-auto -mx-1">
       <table className="min-w-full text-sm">
         <thead>
-          <tr className="text-left text-xs uppercase tracking-wide text-muted-foreground border-b">
+          <tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground border-b">
             {columns.map((c) => (
-              <th key={c.key} className="py-2 pr-4 font-medium">{c.label}</th>
+              <th key={c.key} className="py-2.5 pr-4 font-semibold">{c.label}</th>
             ))}
-            <th className="py-2 font-medium" />
+            <th className="py-2.5 font-semibold">Status</th>
+            <th className="py-2.5" />
           </tr>
         </thead>
         <tbody>
-          {rows.map((r) => (
-            <FragmentRow key={String(r.id)} row={r} columns={columns} open={openId === String(r.id)} onToggle={() => setOpenId(openId === String(r.id) ? null : String(r.id))} />
-          ))}
+          {rows.map((r, i) => {
+            const open = openId === String(r.id);
+            return (
+              <FragmentRow
+                key={String(r.id)}
+                row={r}
+                columns={columns}
+                open={open}
+                index={i}
+                detail={detail}
+                onToggle={() => setOpenId(open ? null : String(r.id))}
+              />
+            );
+          })}
         </tbody>
       </table>
     </div>
   );
 }
 
-function FragmentRow({ row, columns, open, onToggle }: { row: Record<string, unknown>; columns: { key: string; label: string }[]; open: boolean; onToggle: () => void }) {
-  const extra = Object.entries(row).filter(([k]) => !columns.some((c) => c.key === k) && k !== 'id');
+function FragmentRow({ row, columns, open, index, detail, onToggle }: { row: any; columns: { key: string; label: string }[]; open: boolean; index: number; detail: (r: any) => React.ReactNode; onToggle: () => void }) {
+  const status = row.payment_status || row.status || '—';
+  const statusOk = String(status).toLowerCase() === 'paid' || String(status).toLowerCase() === 'completed';
   return (
     <>
-      <tr className="border-b hover:bg-gray-50 cursor-pointer" onClick={onToggle}>
+      <tr
+        className="admin-row border-b cursor-pointer anim-fade-up"
+        style={{ animationDelay: `${index * 40}ms` }}
+        onClick={onToggle}
+      >
         {columns.map((c) => (
-          <td key={c.key} className="py-2.5 pr-4 text-gray-800">{String(row[c.key] ?? '—')}</td>
+          <td key={c.key} className="py-3 pr-4 text-gray-800">{String(row[c.key] ?? '—')}</td>
         ))}
-        <td className="py-2.5">{open ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}</td>
+        <td className="py-3 pr-4">
+          <span className={`inline-block text-[11px] font-semibold px-2 py-0.5 rounded-full ${statusOk ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+            {status}
+          </span>
+        </td>
+        <td className="py-3">
+          <span className={`inline-flex items-center gap-1 text-primary transition-transform duration-200 ${open ? 'rotate-180' : ''}`}>
+            <ChevronDown className="w-4 h-4" />
+          </span>
+        </td>
       </tr>
       {open && (
-        <tr className="border-b bg-gray-50/60">
-          <td colSpan={columns.length + 1} className="py-3 px-4">
-            <div className="grid sm:grid-cols-2 gap-x-6 gap-y-1">
-              {extra.map(([k, v]) => {
-                if (v === null || v === undefined || v === '') return null;
-                return (
-                  <div key={k} className="text-xs">
-                    <span className="text-muted-foreground capitalize">{k.replace(/_/g, ' ')}: </span>
-                    <span className="text-gray-800">{typeof v === 'boolean' ? (v ? 'Yes' : 'No') : String(v)}</span>
-                  </div>
-                );
-              })}
-            </div>
+        <tr className="border-b bg-gradient-to-b from-gray-50/80 to-white">
+          <td colSpan={columns.length + 2} className="py-5 px-5">
+            {detail(row)}
           </td>
         </tr>
       )}
@@ -95,14 +288,12 @@ function FragmentRow({ row, columns, open, onToggle }: { row: Record<string, unk
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const [tab, setTab] = useState<Tab>('submissions');
+  const [tab, setTab] = useState<Tab>('membership');
   const [loading, setLoading] = useState(true);
 
   // submissions
   const [society, setSociety] = useState<SocietySubmission[]>([]);
   const [dainik, setDainik] = useState<DainikSubmission[]>([]);
-  const [memberships, setMemberships] = useState<Record<string, unknown>[]>([]);
-  const [seva, setSeva] = useState<Record<string, unknown>[]>([]);
 
   // gallery
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
@@ -152,20 +343,13 @@ export default function AdminDashboard() {
         return null;
       }
     };
-    const [s, d, m, sv] = await Promise.all([
-      safe(getSocietySubmissions),
-      safe(getDainikSubmissions),
-      safe(getAdminMemberships),
-      safe(getAdminSeva),
-    ]);
+    const [s, d] = await Promise.all([safe(getSocietySubmissions), safe(getDainikSubmissions)]);
     if (unauthenticated) {
       navigate('/admin/login', { replace: true });
       return;
     }
     setSociety((s as SocietySubmission[]) || []);
     setDainik((d as DainikSubmission[]) || []);
-    setMemberships(m || []);
-    setSeva(sv || []);
   }, [navigate]);
 
   const refreshGallery = useCallback(async () => {
@@ -330,44 +514,31 @@ export default function AdminDashboard() {
   };
 
   const inputCls = 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition text-sm';
+  const fileBtnCls = 'inline-flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-lg disabled:opacity-50 transition hover:scale-[1.02] active:scale-[0.98]';
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-muted-foreground">Loading admin panel…</p>
+        <p className="text-muted-foreground anim-fade-in">Loading admin panel…</p>
       </div>
     );
   }
 
   const societyColumns = [
     { key: 'name', label: 'Name' },
+    { key: 'membership_type', label: 'Type' },
     { key: 'mobile', label: 'Mobile' },
     { key: 'email', label: 'Email' },
-    { key: 'membership_type', label: 'Type' },
-    { key: 'payment_status', label: 'Status' },
   ];
   const dainikColumns = [
     { key: 'name', label: 'Name' },
     { key: 'mobile', label: 'Mobile' },
     { key: 'email', label: 'Email' },
-    { key: 'payment_status', label: 'Status' },
-  ];
-  const membershipColumns = [
-    { key: 'full_name', label: 'Name' },
-    { key: 'phone', label: 'Phone' },
-    { key: 'email', label: 'Email' },
-    { key: 'status', label: 'Status' },
-  ];
-  const sevaColumns = [
-    { key: 'full_name', label: 'Name' },
-    { key: 'phone', label: 'Phone' },
-    { key: 'seva_type', label: 'Seva' },
-    { key: 'status', label: 'Status' },
   ];
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-temple-dark text-white sticky top-0 z-40">
+      <header className="bg-temple-dark text-white sticky top-0 z-40 shadow-md">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <LayoutDashboard className="w-5 h-5" />
@@ -376,13 +547,13 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-2">
             <button
               onClick={refreshSubmissions}
-              className="text-xs px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 flex items-center gap-1"
+              className="text-xs px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 flex items-center gap-1 transition"
             >
               <RefreshCw className="w-3.5 h-3.5" /> Refresh
             </button>
             <button
               onClick={handleLogout}
-              className="text-xs px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 flex items-center gap-1"
+              className="text-xs px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 flex items-center gap-1 transition"
             >
               <LogOut className="w-3.5 h-3.5" /> Logout
             </button>
@@ -395,7 +566,7 @@ export default function AdminDashboard() {
               <button
                 key={t.id}
                 onClick={() => setTab(t.id)}
-                className={`px-3 py-2 text-sm rounded-t-lg flex items-center gap-1.5 transition ${
+                className={`px-3 py-2 text-sm rounded-t-lg flex items-center gap-1.5 transition-all duration-200 ${
                   tab === t.id ? 'bg-gray-50 text-temple-dark font-medium' : 'text-white/80 hover:bg-white/10'
                 }`}
               >
@@ -408,25 +579,30 @@ export default function AdminDashboard() {
 
       <main className="max-w-6xl mx-auto px-4 py-6">
         {notice && (
-          <div className="mb-4 flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-4 py-2">
+          <div className="mb-4 flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-4 py-2 anim-fade-up">
             <CheckCircle className="w-4 h-4" /> {notice}
           </div>
         )}
 
-        {tab === 'submissions' && (
+        {tab === 'membership' && (
           <div className="space-y-6">
-            <SectionCard title={`Society Membership (${society.length})`}>
-              <SubTable rows={society as unknown as Record<string, unknown>[]} columns={societyColumns} />
+            <SectionCard title="Society Membership Applications" badge={`${society.length} total`}>
+              <SubTable rows={society} columns={societyColumns} detail={(r) => <SocietyDetail row={r} />} />
             </SectionCard>
-            <SectionCard title={`Dainik Sewa Membership (${dainik.length})`}>
-              <SubTable rows={dainik as unknown as Record<string, unknown>[]} columns={dainikColumns} />
+            <p className="text-xs text-muted-foreground anim-fade-in">
+              Tap any row to view the full application including uploaded documents.
+            </p>
+          </div>
+        )}
+
+        {tab === 'seva' && (
+          <div className="space-y-6">
+            <SectionCard title="Dainik Sewa Applications" badge={`${dainik.length} total`}>
+              <SubTable rows={dainik} columns={dainikColumns} detail={(r) => <DainikDetail row={r} />} />
             </SectionCard>
-            <SectionCard title={`Membership Requests (${memberships.length})`}>
-              <SubTable rows={memberships} columns={membershipColumns} />
-            </SectionCard>
-            <SectionCard title={`Seva Requests (${seva.length})`}>
-              <SubTable rows={seva} columns={sevaColumns} />
-            </SectionCard>
+            <p className="text-xs text-muted-foreground anim-fade-in">
+              Tap any row to view the full application including uploaded documents.
+            </p>
           </div>
         )}
 
@@ -453,20 +629,20 @@ export default function AdminDashboard() {
                   />
                   {gFile && <p className="text-xs text-green-600 mt-1">Selected: {gFile.name}</p>}
                 </div>
-                <button type="submit" disabled={busy} className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-lg disabled:opacity-50">
+                <button type="submit" disabled={busy} className={fileBtnCls}>
                   <Upload className="w-4 h-4" /> Upload
                 </button>
               </form>
             </SectionCard>
-            <SectionCard title={`Gallery (${gallery.length})`}>
+            <SectionCard title={`Gallery`} badge={`${gallery.length} photos`} delay={80}>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                {gallery.map((g) => (
-                  <div key={g.id} className="relative group rounded-lg overflow-hidden border border-border">
-                    <img src={g.image_url} alt={g.title} className="w-full aspect-square object-cover" />
+                {gallery.map((g, i) => (
+                  <div key={g.id} className="relative group rounded-lg overflow-hidden border border-border anim-fade-up admin-card" style={{ animationDelay: `${i * 50}ms` }}>
+                    <img src={g.image_url} alt={g.title} className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-300" />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition flex items-center justify-center opacity-0 group-hover:opacity-100">
                       <button
                         onClick={async () => { if (confirm('Delete this photo?')) { await deleteGalleryItem(g.id); refreshGallery(); } }}
-                        className="p-2 bg-red-600 rounded-full text-white"
+                        className="p-2 bg-red-600 rounded-full text-white hover:scale-110 transition-transform"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -496,22 +672,23 @@ export default function AdminDashboard() {
                   <input type="checkbox" checked={aActive} onChange={(e) => setAActive(e.target.checked)} className="accent-primary" />
                   Show on homepage
                 </label>
-                <button type="submit" disabled={busy} className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-lg disabled:opacity-50">
+                <button type="submit" disabled={busy} className={fileBtnCls}>
                   <Plus className="w-4 h-4" /> Add Announcement
                 </button>
               </form>
             </SectionCard>
-            <SectionCard title={`Announcements (${announcements.length})`}>
+            <SectionCard title={`Announcements`} badge={`${announcements.length} total`} delay={80}>
               <ul className="divide-y divide-border">
-                {announcements.map((a) => (
-                  <li key={a.id} className="py-3 flex items-start justify-between gap-3">
+                {announcements.map((a, i) => (
+                  <li key={a.id} className="py-3 flex items-start justify-between gap-3 anim-fade-up admin-row rounded px-1" style={{ animationDelay: `${i * 40}ms` }}>
                     <div>
                       <p className="font-medium text-gray-800">{a.title}</p>
                       {a.body && <p className="text-sm text-muted-foreground mt-0.5">{a.body}</p>}
+                      {a.active && <span className="inline-block mt-1 text-[10px] font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">Live</span>}
                     </div>
                     <button
                       onClick={async () => { if (confirm('Delete this announcement?')) { await deleteAnnouncement(a.id); refreshAnnouncements(); } }}
-                      className="p-1.5 text-red-600 hover:bg-red-50 rounded"
+                      className="p-1.5 text-red-600 hover:bg-red-50 rounded transition"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -546,28 +723,28 @@ export default function AdminDashboard() {
                   />
                   {dFile && <p className="text-xs text-green-600 mt-1">Selected: {dFile.name}</p>}
                 </div>
-                <button type="submit" disabled={busy} className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-lg disabled:opacity-50">
+                <button type="submit" disabled={busy} className={fileBtnCls}>
                   <Upload className="w-4 h-4" /> Upload Document
                 </button>
               </form>
             </SectionCard>
-            <SectionCard title={`Documents (${documents.length})`}>
+            <SectionCard title={`Documents`} badge={`${documents.length} total`} delay={80}>
               <ul className="divide-y divide-border">
-                {documents.map((d) => (
-                  <li key={d.id} className="py-3 flex items-center justify-between gap-3">
+                {documents.map((d, i) => (
+                  <li key={d.id} className="py-3 flex items-center justify-between gap-3 anim-fade-up admin-row rounded px-1" style={{ animationDelay: `${i * 40}ms` }}>
                     <div>
                       <p className="font-medium text-gray-800">{d.title}</p>
                       <p className="text-xs text-muted-foreground">{d.category} · {d.original_name || ''}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       {d.file_url && (
-                        <a href={d.file_url} target="_blank" rel="noreferrer" className="p-1.5 text-primary hover:bg-primary/10 rounded" title="View">
-                          <Eye className="w-4 h-4" />
+                        <a href={d.file_url} target="_blank" rel="noreferrer" className="p-1.5 text-primary hover:bg-primary/10 rounded transition" title="View">
+                          <FileDown className="w-4 h-4" />
                         </a>
                       )}
                       <button
                         onClick={async () => { if (confirm('Delete this document?')) { await deleteDocument(d.id); refreshDocuments(); } }}
-                        className="p-1.5 text-red-600 hover:bg-red-50 rounded"
+                        className="p-1.5 text-red-600 hover:bg-red-50 rounded transition"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -587,29 +764,29 @@ export default function AdminDashboard() {
                 <FieldLabel>YouTube video id / link / channel live URL</FieldLabel>
                 <input className={inputCls} value={liveInput} onChange={(e) => setLiveInput(e.target.value)} placeholder="e.g. dQw4w9WgXcQ or https://www.youtube.com/watch?v=…" />
                 <p className="text-xs text-muted-foreground">Leave empty to fall back to automatic detection from the temple YouTube channel.</p>
-                <button type="submit" disabled={busy} className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-lg disabled:opacity-50">
+                <button type="submit" disabled={busy} className={fileBtnCls}>
                   Save Live Stream
                 </button>
               </form>
             </SectionCard>
 
-            <SectionCard title="Aarti Timings">
+            <SectionCard title="Aarti Timings" delay={60}>
               <FieldLabel>One timing per line: Name (TAB) Time</FieldLabel>
               <textarea className={inputCls} rows={6} value={timingsInput} onChange={(e) => setTimingsInput(e.target.value)} placeholder={'Mangala Aarti\t5:30 AM\nMadhyanha Bhoga Aarti\t12:00 PM'} />
-              <button onClick={handleSaveTimings} disabled={busy} className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-lg disabled:opacity-50">
+              <button onClick={handleSaveTimings} disabled={busy} className={`${fileBtnCls} mt-3`}>
                 Save Timings
               </button>
             </SectionCard>
 
-            <SectionCard title="Festival Calendar">
+            <SectionCard title="Festival Calendar" delay={120}>
               <FieldLabel>One festival per line: Name (TAB) Date</FieldLabel>
               <textarea className={inputCls} rows={6} value={festivalsInput} onChange={(e) => setFestivalsInput(e.target.value)} placeholder={'Rath Yatra\t16 July 2026\nJanmashtami\t4 Sep 2026'} />
-              <button onClick={handleSaveFestivals} disabled={busy} className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-lg disabled:opacity-50">
+              <button onClick={handleSaveFestivals} disabled={busy} className={`${fileBtnCls} mt-3`}>
                 Save Festivals
               </button>
             </SectionCard>
 
-            <SectionCard title="Donation / Under-Construction Banner">
+            <SectionCard title="Donation / Under-Construction Banner" delay={180}>
               <label className="flex items-center gap-2 text-sm text-gray-700 mb-3">
                 <input type="checkbox" checked={settings.under_construction} onChange={handleToggleUnderConstruction} className="accent-primary" />
                 Show "temple under construction — donate any amount" banner on the Donate page
@@ -626,7 +803,7 @@ export default function AdminDashboard() {
                 {logoUrl && (
                   <div className="mb-3">
                     <p className="text-xs text-muted-foreground mb-2">Current logo (shown in the header):</p>
-                    <img src={logoUrl} alt="Current logo" className="h-16 w-auto object-contain border border-border rounded-lg p-1 bg-white" />
+                    <img src={logoUrl} alt="Current logo" className="h-20 w-auto object-contain border border-border rounded-lg p-2 bg-white anim-pop" />
                   </div>
                 )}
                 <div>
@@ -638,12 +815,12 @@ export default function AdminDashboard() {
                   />
                   {logoFile && <p className="text-xs text-green-600 mt-1">Selected: {logoFile.name}</p>}
                 </div>
-                <button type="submit" disabled={busy} className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-lg disabled:opacity-50">
+                <button type="submit" disabled={busy} className={fileBtnCls}>
                   <Upload className="w-4 h-4" /> Change Logo
                 </button>
               </form>
             </SectionCard>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground anim-fade-in" style={{ animationDelay: '80ms' }}>
               Tip: Use the existing <code className="bg-gray-100 px-1 rounded">horizontal.png</code> style logo for the best fit. The logo scales up in the header and keeps transparency.
             </p>
           </div>
