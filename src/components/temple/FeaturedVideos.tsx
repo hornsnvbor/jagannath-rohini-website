@@ -1,9 +1,4 @@
 const videos = [
-  'https://www.youtube.com/embed/h88UUijWPXk',
-  'https://www.youtube.com/embed/CR9HXm4Md6g',
-  'https://www.youtube.com/embed/A8UMNyEfiuE',
-  'https://www.youtube.com/embed/J_yVj0560hU',
-  'https://www.youtube.com/embed/l0KGjmHkvN8',
   'https://www.youtube.com/embed/rkgIdy9aQv4',
   'https://www.youtube.com/embed/sB3hFY9xlMU',
   'https://www.youtube.com/embed/kSJT8T_Z0SU',
