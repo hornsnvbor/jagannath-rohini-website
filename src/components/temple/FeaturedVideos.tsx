@@ -4,6 +4,11 @@ const videos = [
   'https://www.youtube.com/embed/A8UMNyEfiuE',
   'https://www.youtube.com/embed/J_yVj0560hU',
   'https://www.youtube.com/embed/l0KGjmHkvN8',
+  'https://www.youtube.com/embed/rkgIdy9aQv4',
+  'https://www.youtube.com/embed/sB3hFY9xlMU',
+  'https://www.youtube.com/embed/kSJT8T_Z0SU',
+  'https://www.youtube.com/embed/I7YWww_REBU',
+  'https://www.youtube.com/embed/07gW2xUhOVc',
 ];
 
 export default function FeaturedVideos() {
