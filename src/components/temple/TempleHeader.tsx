@@ -83,6 +83,25 @@ export default function TempleHeader() {
                 };
                 input.click();
               }
+              <Button
+                className="bg-yellow-500 text-white text-xs font-medium py-1 px-3 rounded"
+                onClick={() => {
+                  const input = document.createElement('input');
+                  input.type = 'file';
+                  input.accept = 'image/*';
+                  input.onchange = e => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        localStorage.setItem('custom_logo', reader.result);
+                        window.location.reload();
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  };
+                  input.click();
+                }
               >
                 Change Logo
               </Button>
