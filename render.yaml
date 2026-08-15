@@ -29,7 +29,7 @@ services:
       - key: RAZORPAY_WEBHOOK_SECRET
         sync: false
       - key: ALLOWED_ORIGINS
-        value: https://jagannathmandirrohini.com
+        value: https://jagannathmandirrohini.com,https://jagannath-rohini-website.vercel.app,https://jagannath-rohini-website-1hebnw6po-normienishants-projects.vercel.app,https://jagannath-rohini-website-git-main-normienishant1610-gmailcoms-projects.vercel.app
       - key: YOUTUBE_CHANNEL_ID
         sync: false
       - key: YOUTUBE_API_KEY
