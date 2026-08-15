@@ -6,14 +6,15 @@ import {
   Palette, ChevronRight, Phone, Mail, MapPin, User, BadgeCheck, FileDown,
 } from 'lucide-react';
 import {
-  adminLogout, deleteAnnouncement, deleteDocument, deleteGalleryItem,
+  adminLogout, deleteAnnouncement, deleteBlogPost, deleteDocument, deleteGalleryItem,
   getAnnouncements, getDainikSubmissions, getDocuments, getGalleryItems,
-  getSiteSettings, getSocietySubmissions, createAnnouncement, uploadDocument,
-  uploadGalleryItem, updateSiteSettings, uploadLogo, type Announcement, type DocumentItem,
-  type GalleryItem, type SiteSettings, type SocietySubmission, type DainikSubmission,
+  getSiteSettings, getSocietySubmissions, createAnnouncement, createBlogPost,
+  updateBlogPost, uploadDocument, uploadGalleryItem, updateSiteSettings, uploadLogo,
+  type Announcement, type BlogPost, type DocumentItem, type GalleryItem,
+  type SiteSettings, type SocietySubmission, type DainikSubmission,
 } from '../../lib/api';
 
-type Tab = 'membership' | 'seva' | 'gallery' | 'announcements' | 'documents' | 'live' | 'branding';
+type Tab = 'membership' | 'seva' | 'gallery' | 'announcements' | 'documents' | 'live' | 'branding' | 'blog';
 
 const TABS: { id: Tab; label: string; icon: typeof Users }[] = [
   { id: 'membership', label: 'Membership', icon: BadgeCheck },
@@ -23,6 +24,7 @@ const TABS: { id: Tab; label: string; icon: typeof Users }[] = [
   { id: 'documents', label: 'Documents', icon: FileText },
   { id: 'live', label: 'Live & Timings', icon: Video },
   { id: 'branding', label: 'Logo & Branding', icon: Palette },
+  { id: 'blog', label: 'Blog', icon: Megaphone },
 ];
 
 function SectionCard({ title, badge, children, delay = 0 }: { title: string; badge?: string; children: React.ReactNode; delay?: number }) {
@@ -313,6 +315,15 @@ export default function AdminDashboard() {
   const [dCategory, setDCategory] = useState('government');
   const [dFile, setDFile] = useState<File | null>(null);
 
+  // blog
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [blogTitle, setBlogTitle] = useState('');
+  const [blogSlug, setBlogSlug] = useState('');
+  const [blogExcerpt, setBlogExcerpt] = useState('');
+  const [blogContent, setBlogContent] = useState('');
+  const [blogCover, setBlogCover] = useState('');
+  const [currentBlogId, setCurrentBlogId] = useState<string | null>(null);
+
   // live & timings
   const [settings, setSettings] = useState<SiteSettings>({
     live_stream: '', timings: [], festivals: [], under_construction: false, donate_banner: '', logo_url: '',
@@ -364,6 +375,10 @@ export default function AdminDashboard() {
     try { setDocuments(await getDocuments()); } catch { /* ignore */ }
   }, []);
 
+  const fetchBlogPosts = useCallback(async () => {
+    try { setBlogPosts(await getBlogPosts()); } catch { /* ignore */ }
+  }, []);
+
   const refreshSettings = useCallback(async () => {
     try {
       const s = await getSiteSettings();
@@ -378,11 +393,11 @@ export default function AdminDashboard() {
   useEffect(() => {
     (async () => {
       await Promise.all([
-        refreshSubmissions(), refreshGallery(), refreshAnnouncements(), refreshDocuments(), refreshSettings(),
+        refreshSubmissions(), refreshGallery(), refreshAnnouncements(), refreshDocuments(), refreshSettings(), fetchBlogPosts(),
       ]);
       setLoading(false);
     })();
-  }, [refreshSubmissions, refreshGallery, refreshAnnouncements, refreshDocuments, refreshSettings]);
+  }, [refreshSubmissions, refreshGallery, refreshAnnouncements, refreshDocuments, refreshSettings, fetchBlogPosts]);
 
   const handleUploadGallery = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -753,6 +768,97 @@ export default function AdminDashboard() {
                 ))}
               </ul>
               {documents.length === 0 && <p className="text-sm text-muted-foreground">No documents yet.</p>}
+            </SectionCard>
+          </div>
+        )}
+
+        {tab === 'blog' && (
+          <div className="space-y-6">
+            <SectionCard title="Manage Blog Posts" delay={80}>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <FieldLabel>Title</FieldLabel>
+                  <input className={inputCls} value={blogTitle} onChange={(e) => setBlogTitle(e.target.value)} placeholder="Blog post title" />
+                  <FieldLabel>Slug (e.g. festival-update)</FieldLabel>
+                  <input className={inputCls} value={blogSlug} onChange={(e) => setBlogSlug(e.target.value)} placeholder="festival-update" />
+                </div>
+                <FieldLabel>Excerpt (optional)</FieldLabel>
+                <textarea className={inputCls} rows={3} value={blogExcerpt} onChange={(e) => setBlogExcerpt(e.target.value)} placeholder="Short summary..." />
+                <FieldLabel>Content</FieldLabel>
+                <textarea className={textareaCls} rows={6} value={blogContent} onChange={(e) => setBlogContent(e.target.value)} placeholder="Blog post content..."></textarea>
+                <FieldLabel>Cover Image URL (optional)</FieldLabel>
+                <input className={inputCls} value={blogCover} onChange={(e) => setBlogCover(e.target.value)} placeholder="https://example.com/image.jpg" />
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={async () => {
+                    if (!blogTitle.trim() || !blogSlug.trim()) return alert('Title and slug required');
+                    await createBlogPost({ title: blogTitle, slug: blogSlug, excerpt: blogExcerpt, content: blogContent, cover_image: blogCover });
+                    fetchBlogPosts();
+                    setBlogTitle(''); setBlogSlug(''); setBlogExcerpt(''); setBlogContent(''); setBlogCover('');
+                    flash('Blog post created');
+                  }}
+                  disabled={busy}
+                  className={fileBtnCls}
+                >
+                  Publish
+                </button>
+                <button
+                  onClick={async () => {
+                    if (!currentBlogId) return alert('Select a post to update');
+    await updateBlogPost(currentBlogId, { title: blogTitle, slug: blogSlug, excerpt: blogExcerpt, content: blogContent, cover_image: blogCover });
+    fetchBlogPosts();
+    setBlogTitle(''); setBlogSlug(''); setBlogExcerpt(''); setBlogContent(''); setBlogCover('');
+    flash('Blog post updated');
+                  }}
+                  disabled={busy}
+                  className={fileBtnCls}
+                >
+                  Update
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">Leave slug empty to auto-generate from title, or set published:false to keep draft.</p>
+            </SectionCard>
+
+            <SectionCard title={`Blog Posts (${blogPosts.length})`} badge={`${blogPosts.length} total`} delay={120}>
+              <ul className="divide-y divide-border">
+                {blogPosts.map((p) => (
+                  <li key={p.id} className="py-3 flex items-center justify-between gap-3 anim-fade-up admin-row rounded px-1" style={{ animationDelay: `${i * 40}ms` }}>
+                    <div>
+                      <p className="font-medium text-gray-800">{p.title}</p>
+                      <p className="text-xs text-muted-foreground">{p.slug}</p>
+                      {p.excerpt && <p className="text-xs text-muted-foreground line-clamp-1">{p.excerpt}</p>}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          setBlogTitle(p.title);
+                          setBlogSlug(p.slug);
+                          setBlogExcerpt(p.excerpt || '');
+                          setBlogContent(p.content);
+                          setBlogCover(p.cover_image || '');
+                        }}
+                        className="p-1.5 text-primary hover:bg-primary/10 rounded transition"
+                        title="Edit"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (confirm('Delete this blog post?'));
+                          await deleteBlogPost(p.id);
+                          fetchBlogPosts();
+                          flash('Blog post deleted');
+                        }}
+                        className="p-1.5 text-red-600 hover:bg-red-50 rounded transition"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              {blogPosts.length === 0 && <p className="text-sm text-muted-foreground">No blog posts yet.</p>}
             </SectionCard>
           </div>
         )}

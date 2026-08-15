@@ -1,11 +1,52 @@
 import { useEffect, useState } from 'react';
 import { Helmet } from '@dr.pogodin/react-helmet';
-import { FileText, Download } from 'lucide-react';
+import { FileText, Download, Eye, } from 'lucide-react';
 import { getDocuments, type DocumentItem } from '@/lib/api';
+
+function PdfViewer({ src }: { src: string }) {
+  const [show, setShow] = useState(false);
+  return (
+    <>
+      <button
+        onClick={() => setShow(true)}
+        className="text-primary hover:underline mr-2"
+        title="View PDF"
+      >
+        <Eye className="w-4 h-4" />
+      </button>
+      <div
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center"
+        role="dialog"
+        aria-modal="true"
+      >
+        <button
+          onClick={() => setShow(false)}
+          className="absolute top-4 right-4 text-white/60 hover:text-white transition"
+          aria-label="Close PDF viewer"
+        >
+          <svg
+            className="w-6 h-6"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+          >
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+        <iframe
+          src={src}
+          title="Document"
+          className="max-w-full max-h-[80vh] w-full rounded-lg"
+          allowFullScreen
+        />
+      </div>
+    </>
+  );
+}
 
 export default function DocumentsPage() {
   const [items, setItems] = useState<DocumentItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [openPdf, setOpenPdf] = useState<string | null>(null);
 
   useEffect(() => {
     getDocuments()
@@ -67,6 +108,7 @@ export default function DocumentsPage() {
                     </div>
                   </div>
                   <Download className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <PdfViewer src={d.file_url || ''} />
                 </a>
               ))}
             </div>
