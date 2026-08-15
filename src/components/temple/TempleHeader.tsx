@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useLocation } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, X, ChevronDown } from 'lucide-react';
 import { getSiteSettings } from '../../lib/api';
@@ -42,6 +42,9 @@ export default function TempleHeader() {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
+  const { pathname } = useLocation();
+  const isHome = pathname === '/';
+
   useEffect(() => {
     let active = true;
     getSiteSettings()
@@ -49,6 +52,8 @@ export default function TempleHeader() {
       .catch(() => { /* backend unreachable — keep default logo */ });
     return () => { active = false; };
   }, []);
+
+  const showDonate = isHome;
 
   const toggleMobile = () => setMobileOpen((v) => !v);
   const src = logoUrl || logoPath;
@@ -94,12 +99,19 @@ export default function TempleHeader() {
             >
               {mobileOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
-            <Link
-              to="/donate"
-              className="hidden lg:inline-block bg-red-600 hover:bg-red-700 text-white text-sm font-bold px-6 py-3 rounded-full shadow-sm"
-            >
-              Donate Now
-            </Link>
+            {showDonate && (
+              <Link
+                to="/donate"
+                className="hidden lg:inline-block bg-red-600 hover:bg-red-700 text-white text-sm font-bold px-6 py-3 rounded-full shadow-sm"
+              >
+                Donate Now
+              </Link>
+            )}
+            {!showDonate && (
+              <span className="hidden lg:inline-block text-white text-sm font-medium px-6 py-3">
+                Donate Now
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -181,6 +193,11 @@ export default function TempleHeader() {
             >
               Donate Now
             </Link>
+            {!showDonate && (
+              <div className="mt-2 text-white text-center text-sm font-bold px-4 py-2">
+                Donate Now
+              </div>
+            )}
           </div>
         </nav>
       )}
