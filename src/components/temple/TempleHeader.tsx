@@ -40,7 +40,10 @@ const logoPath = '/airo-assets/images/logo/horizontal.png';
 export default function TempleHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  // undefined = settings not loaded yet, null = no uploaded logo (use default),
+  // string = uploaded logo URL. We never render the logo until settings are
+  // loaded so the old/default logo never flashes before the uploaded one.
+  const [logoUrl, setLogoUrl] = useState<string | null | undefined>(undefined);
 
   const { pathname } = useLocation();
   const isHome = pathname === '/';
@@ -48,8 +51,8 @@ export default function TempleHeader() {
   useEffect(() => {
     let active = true;
     getSiteSettings()
-      .then((s) => { if (active && s.logo_url) setLogoUrl(s.logo_url); })
-      .catch(() => { /* backend unreachable — keep default logo */ });
+      .then((s) => { if (active) setLogoUrl(s.logo_url || null); })
+      .catch(() => { if (active) setLogoUrl(null); });
     return () => { active = false; };
   }, []);
 
@@ -62,12 +65,16 @@ export default function TempleHeader() {
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-4 order-1 lg:order-none">
             <Link to="/" className="shrink-0">
-              <img
-                src={src}
-                alt="Jagannath Mandir Rohini"
-                className="h-20 lg:h-28 w-auto object-contain"
-                loading="eager"
-                fetchPriority="high" />
+              {logoUrl !== undefined ? (
+                <img
+                  src={src}
+                  alt="Jagannath Mandir Rohini"
+                  className="h-20 lg:h-28 w-auto object-contain"
+                  loading="eager"
+                  fetchPriority="high" />
+              ) : (
+                <div className="h-20 lg:h-28 w-44 lg:w-56" aria-hidden="true" />
+              )}
             </Link>
             <div className="text-yellow-950">
               <p className="text-base lg:text-lg font-bold leading-tight">Jagannath Mandir</p>
