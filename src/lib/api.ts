@@ -1,8 +1,9 @@
-// API base — relative by default so the production single-container deploy
-// (frontend + backend on the same origin) works with zero config. For local
-// dev set VITE_API_BASE_URL in .env.local, or rely on the Vite /api proxy.
-const RAW_BASE: string = (import.meta.env.VITE_API_BASE_URL as string) || '';
-const API_BASE = RAW_BASE && RAW_BASE !== '/' ? RAW_BASE.replace(/\/$/, '') : '';
+// API base — ALWAYS relative `/api`. In production the Vercel `vercel.json`
+// rewrite forwards `/api/*` to the Render backend, so the browser only ever
+// talks to its own origin. This keeps the httpOnly `admin_session` cookie
+// same-site (SameSite=Lax works). For local dev the Vite `/api` proxy targets
+// the local FastAPI server, so no env var is needed either.
+const API_BASE = '';
 
 class ApiError extends Error {
   status: number;
