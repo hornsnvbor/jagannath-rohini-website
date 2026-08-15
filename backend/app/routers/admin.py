@@ -11,36 +11,19 @@ router = APIRouter(prefix="/api/admin", tags=["admin"])
 
 @router.get("/members")
 def list_members(db: Session = Depends(get_db), admin: str = Depends(require_admin)):
-    """Display all membership form submissions."""
+    """Display all (simple) membership form submissions."""
     rows = db.query(MembershipForm).order_by(MembershipForm.created_at.desc()).all()
     return [
         {
             "id": r.id,
             "full_name": r.full_name,
-            "father_husband_name": r.father_husband_name,
-            "gotra": r.gotra,
-            "dob": str(r.dob) if r.dob else None,
-            "blood_group": r.blood_group,
-            "residence_address": r.residence_address,
-            "office_address": r.office_address,
-            "residence_telephone": r.residence_telephone,
-            "office_telephone": r.office_telephone,
-            "mobile": r.mobile,
-            "fax": r.fax,
+            "phone": r.phone,
             "email": r.email,
-            "pan": r.pan,
-            "occupation_designation": r.occupation_designation,
-            "introducing_member_name": r.introducing_member_name,
-            "introducing_member_mobile": r.introducing_member_mobile,
-            "place": r.place,
-            "member_signature": r.member_signature,
-            "member_photo": r.member_photo,
-            "spouse_photo": r.spouse_photo,
-            "pan_document": r.pan_document,
-            "aadhaar_document": r.aadhaar_document,
-            "membership_type": r.membership_type,
-            "amount_in_words": r.amount_in_words,
-            "payment_method": r.payment_method,
+            "address": r.address,
+            "occupation": r.occupation,
+            "family_members": r.family_members,
+            "message": r.message,
+            "status": r.status,
             "created_at": r.created_at.isoformat() if r.created_at else None,
         }
         for r in rows

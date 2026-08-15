@@ -143,19 +143,29 @@ export default function AdminDashboard() {
   };
 
   const refreshSubmissions = useCallback(async () => {
-    try {
-      const [s, d, m, sv] = await Promise.all([
-        getSocietySubmissions(), getDainikSubmissions(), getAdminMemberships(), getAdminSeva(),
-      ]);
-      setSociety(s as SocietySubmission[]);
-      setDainik(d as DainikSubmission[]);
-      setMemberships(m);
-      setSeva(sv);
-    } catch (err: any) {
-      if (err?.status === 401) {
-        navigate('/admin/login', { replace: true });
+    let unauthenticated = false;
+    const safe = async <T,>(fn: () => Promise<T>): Promise<T | null> => {
+      try {
+        return await fn();
+      } catch (err: any) {
+        if (err?.status === 401) unauthenticated = true;
+        return null;
       }
+    };
+    const [s, d, m, sv] = await Promise.all([
+      safe(getSocietySubmissions),
+      safe(getDainikSubmissions),
+      safe(getAdminMemberships),
+      safe(getAdminSeva),
+    ]);
+    if (unauthenticated) {
+      navigate('/admin/login', { replace: true });
+      return;
     }
+    setSociety((s as SocietySubmission[]) || []);
+    setDainik((d as DainikSubmission[]) || []);
+    setMemberships(m || []);
+    setSeva(sv || []);
   }, [navigate]);
 
   const refreshGallery = useCallback(async () => {
