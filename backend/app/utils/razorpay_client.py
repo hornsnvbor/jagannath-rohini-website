@@ -90,9 +90,14 @@ def create_dainik_subscription(notes: dict, email: str, contact: str, total_coun
 
 def verify_subscription_signature(subscription_id: str, payment_id: str, signature: str) -> bool:
     """Verifies the checkout-side signature for a subscription setup payment
-    (Razorpay sends these back to the frontend)."""
+    (Razorpay sends these back to the frontend).
+
+    NOTE: this must use verify_subscription_payment_signature, NOT
+    verify_payment_signature — the latter only reads `razorpay_order_id` and
+    would raise KeyError for subscriptions. The subscription signature is
+    HMAC(payment_id|subscription_id) with the key secret."""
     try:
-        client.utility.verify_payment_signature({
+        client.utility.verify_subscription_payment_signature({
             "razorpay_subscription_id": subscription_id,
             "razorpay_payment_id": payment_id,
             "razorpay_signature": signature,

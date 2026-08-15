@@ -44,10 +44,13 @@ services:
         sync: false
       - key: SMTP_FROM
         sync: false
+      # Real 80G trust details must be entered in the Render dashboard — the
+      # backend refuses to start in production with placeholder (AAAAA...) values,
+      # because these go on real tax receipts.
       - key: TRUST_PAN
-        value: AAAAA0000A
+        sync: false
       - key: TRUST_80G_REG_NO
-        value: AAAAA0000A00000
+        sync: false
 
   # ---------- Database (PostgreSQL) ----------
   # Note: Render no longer offers a free Postgres instance — choose the plan

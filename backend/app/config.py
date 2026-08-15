@@ -90,7 +90,15 @@ class Settings(BaseSettings):
         "RAZORPAY_KEY_ID",
         "RAZORPAY_KEY_SECRET",
         "RAZORPAY_WEBHOOK_SECRET",
+        # 80G receipts go out with these — never allow placeholder values.
+        "TRUST_PAN",
+        "TRUST_80G_REG_NO",
     )
+
+    # Values that are obviously placeholders ("replace-..." or fake 80G details
+    # like AAAAA0000A). Startup fails loud in production instead of quietly
+    # issuing receipts with bogus trust numbers.
+    PLACEHOLDER_MARKERS: tuple[str, ...] = ("replace-", "AAAAA")
 
     @property
     def allowed_origins_list(self) -> list[str]:
@@ -115,7 +123,9 @@ class Settings(BaseSettings):
             value = getattr(self, key, "")
             if value in (None, ""):
                 missing.append(key)
-            elif isinstance(value, str) and "replace-" in value.lower():
+            elif isinstance(value, str) and any(
+                marker.lower() in value.lower() for marker in self.PLACEHOLDER_MARKERS
+            ):
                 missing.append(key)
         return missing
 

@@ -3,8 +3,6 @@ import { Helmet } from '@dr.pogodin/react-helmet';
 import { Radio } from 'lucide-react';
 import { getLiveStatus, getSiteSettings, type LiveStatus, type SiteSettings } from '@/lib/api';
 
-const FALLBACK_CHANNEL = 'Jeetendra.Happy-777_Life';
-
 const DEFAULT_TIMINGS = [
   { name: 'Mangala Aarti', time: '5:30 AM' },
   { name: 'Madhyanha Bhoga Aarti', time: '12:00 PM' },
@@ -17,18 +15,26 @@ export default function LiveDarshanPage() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
 
   useEffect(() => {
-    getLiveStatus()
-      .then(setStatus)
-      .catch(() => setStatus({ is_live: false, video_id: null, title: null, embed_url: null }));
+    // Refresh every 60s (backend caches YouTube status for the same window) so
+    // the player appears on its own the moment the channel goes live — no
+    // manual reload needed.
+    const fetchStatus = () => {
+      getLiveStatus()
+        .then(setStatus)
+        .catch(() => setStatus({ is_live: false, video_id: null, title: null, embed_url: null }));
+    };
+    fetchStatus();
+    const timer = setInterval(fetchStatus, 60_000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
     getSiteSettings()
       .then(setSettings)
       .catch(() => setSettings(null));
   }, []);
 
-  const embedUrl =
-    status?.embed_url ||
-    (status?.video_id ? `https://www.youtube.com/embed/${status.video_id}` : null) ||
-    (status?.is_live ? `https://www.youtube.com/embed/live_stream?channel=${FALLBACK_CHANNEL}` : null);
+  const embedUrl = status?.embed_url || (status?.video_id ? `https://www.youtube.com/embed/${status.video_id}` : null);
 
   const timings = settings && settings.timings && settings.timings.length > 0 ? settings.timings : DEFAULT_TIMINGS;
 

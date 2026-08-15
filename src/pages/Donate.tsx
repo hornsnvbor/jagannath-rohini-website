@@ -26,6 +26,7 @@ export default function DonatePage() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [settings, setSettings] = useState<SiteSettings | null>(null);
+  const [smtpConfigured, setSmtpConfigured] = useState(false);
 
   const { loadRazorpay, isLoaded } = useRazorpay();
 
@@ -33,6 +34,9 @@ export default function DonatePage() {
     getSiteSettings()
       .then(setSettings)
       .catch(() => setSettings(null));
+    getPublicConfig()
+      .then((cfg) => setSmtpConfigured(Boolean(cfg.smtp_configured)))
+      .catch(() => setSmtpConfigured(false));
   }, []);
 
   const getRazorpayKey = async (): Promise<string> => {
@@ -126,7 +130,11 @@ export default function DonatePage() {
       <FormPageShell
         title="Donation Successful!"
         success={true}
-        successMessage="Thank you for your generous contribution. We have sent the receipt to your email."
+        successMessage={
+          smtpConfigured
+            ? 'Thank you for your generous contribution. We have sent the receipt to your email.'
+            : 'Thank you for your generous contribution. Your 80G receipt will be emailed to you shortly.'
+        }
       />
     );
   }
