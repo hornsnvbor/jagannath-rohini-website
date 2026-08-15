@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ChevronDown } from 'lucide-react';
-import { getSiteSettings } from '../../lib/api';
 
 const navItems = [
   { label: 'Home', href: '/' },
@@ -35,29 +34,18 @@ const navItems = [
   { label: 'Contact', href: '/contact' },
 ];
 
-const logoPath = '/airo-assets/images/logo/horizontal.png';
+// Fixed header logo — the Jagannath Mandir circular emblem. Always used,
+// no settings fetch / swapping, so it can never flash or change.
+const logoPath = '/airo-assets/images/logo/jagannath-emblem.png';
 
 export default function TempleHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  // undefined = settings not loaded yet, null = no uploaded logo (use default),
-  // string = uploaded logo URL. We never render the logo until settings are
-  // loaded so the old/default logo never flashes before the uploaded one.
-  const [logoUrl, setLogoUrl] = useState<string | null | undefined>(undefined);
 
   const { pathname } = useLocation();
   const isHome = pathname === '/';
 
-  useEffect(() => {
-    let active = true;
-    getSiteSettings()
-      .then((s) => { if (active) setLogoUrl(s.logo_url || null); })
-      .catch(() => { if (active) setLogoUrl(null); });
-    return () => { active = false; };
-  }, []);
-
   const toggleMobile = () => setMobileOpen((v) => !v);
-  const src = logoUrl || logoPath;
 
   return (
     <header className="sticky top-0 z-50 w-full shadow-md">
@@ -65,16 +53,12 @@ export default function TempleHeader() {
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-4 order-1 lg:order-none">
             <Link to="/" className="shrink-0">
-              {logoUrl !== undefined ? (
-                <img
-                  src={src}
-                  alt="Jagannath Mandir Rohini"
-                  className="h-20 lg:h-28 w-auto object-contain"
-                  loading="eager"
-                  fetchPriority="high" />
-              ) : (
-                <div className="h-20 lg:h-28 w-44 lg:w-56" aria-hidden="true" />
-              )}
+              <img
+                src={logoPath}
+                alt="Jagannath Mandir Rohini"
+                className="h-20 lg:h-28 w-auto object-contain"
+                loading="eager"
+                fetchPriority="high" />
             </Link>
             <div className="text-yellow-950">
               <p className="text-base lg:text-lg font-bold leading-tight">Jagannath Mandir</p>
