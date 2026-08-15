@@ -302,106 +302,6 @@ export interface LiveStatus {
 
 export const getLiveStatus = () => request<LiveStatus>('/api/live/status');
 
-<<<<<<< HEAD
-// ---- Admin auth (httpOnly cookie session) ----
-export const adminLogin = (email: string, password: string) =>
-  request<{ authenticated: boolean; email: string }>('/api/auth/login', {
-    method: 'POST',
-    body: JSON.stringify({ email, password }),
-  });
-
-export const adminLogout = () =>
-  request<{ authenticated: boolean }>('/api/auth/logout', { method: 'POST' });
-
-export const adminMe = () =>
-  request<{ authenticated: boolean; email?: string }>('/api/auth/me');
-
-// ---- Announcements ----
-export interface Announcement {
-  id: string;
-  title: string;
-  body: string | null;
-  active: boolean;
-  created_at: string;
-}
-
-export const getAnnouncements = () => request<Announcement[]>('/api/announcements');
-export const createAnnouncement = (payload: { title: string; body?: string; active?: boolean }) =>
-  request<Announcement>('/api/admin/announcements', { method: 'POST', body: JSON.stringify(payload) });
-export const deleteAnnouncement = (id: string) =>
-  request<{ message: string }>(`/api/admin/announcements/${id}`, { method: 'DELETE' });
-
-// ---- Government documents ----
-export interface DocumentItem {
-  id: string;
-  title: string;
-  category: string;
-  file_url: string | null;
-  original_name: string | null;
-  created_at: string;
-}
-
-export const getDocuments = () => request<DocumentItem[]>('/api/documents');
-export const uploadDocument = (title: string, category: string, file: File) => {
-  const fd = new FormData();
-  fd.append('title', title);
-  fd.append('category', category);
-  fd.append('file', file);
-  return request<DocumentItem>('/api/admin/documents', { method: 'POST', body: fd });
-};
-export const deleteDocument = (id: string) =>
-  request<{ message: string }>(`/api/admin/documents/${id}`, { method: 'DELETE' });
-
-// ---- Site settings (live stream / timings / festivals / under-construction) ----
-export interface SiteSettings {
-  live_stream: string;
-  timings: { name: string; time: string }[];
-  festivals: { name: string; date: string }[];
-  under_construction: boolean;
-  donate_banner: string;
-  logo_url: string;
-}
-
-export const getSiteSettings = () => request<SiteSettings>('/api/site/settings');
-export const updateSiteSettings = (payload: Partial<SiteSettings>) =>
-  request<SiteSettings>('/api/admin/site/settings', { method: 'PUT', body: JSON.stringify(payload) });
-
-// ---- Admin logo upload ----
-export const uploadLogo = (file: File) => {
-  const fd = new FormData();
-  fd.append('file', file);
-  return request<{ logo_url: string; stored_name: string }>('/api/admin/logo', { method: 'POST', body: fd });
-};
-
-// ---- Admin gallery upload ----
-export const uploadGalleryItem = (title: string, category: string, file: File) => {
-  const fd = new FormData();
-  fd.append('title', title);
-  fd.append('category', category);
-  fd.append('file', file);
-  return request<{ id: string; title: string; image_url: string; category: string }>('/api/admin/gallery', {
-    method: 'POST',
-    body: fd,
-  });
-};
-export const deleteGalleryItem = (id: string) =>
-  request<{ message: string }>(`/api/gallery/${id}`, { method: 'DELETE' });
-
-// ---- Admin submissions ----
-export interface SocietySubmission extends Record<string, unknown> {
-  id: string;
-  name: string;
-  mobile: string;
-  email: string;
-  membership_type: string;
-  membership_amount?: number;
-  payment_method?: string;
-  payment_status?: string;
-  created_at?: string;
-}
-
-export interface DainikSubmission extends Record<string, unknown> {
-=======
 // ---- Admin: login ----
 export const adminLogin = async (email: string, password: string): Promise<string> => {
   const { access_token } = await request<{ access_token: string; token_type: string }>('/api/auth/login', {
@@ -428,7 +328,6 @@ export const getSocietyMemberships = () =>
 
 // ---- Admin: Dainik Sewa submissions ----
 export interface DainikSewaRow {
->>>>>>> d4daa6f (fixed homepage)
   id: string;
   name: string;
   mobile: string;
