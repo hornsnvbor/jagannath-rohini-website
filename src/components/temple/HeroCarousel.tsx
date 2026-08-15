@@ -24,7 +24,7 @@ const slides = [
   image: '/airo-assets/images/hero/slide-3-celebration.jpg',
   headline: 'Divine celebrations at Jagannath Mandir, Rohini!',
   subtext: 'Feel the bliss of the sacred Shree Jagannath Rath Yatra 🛕',
-  cta: { label: 'Click Here', href: '/2023/04/04/rath-yatra' }
+  cta: { label: 'Click Here', href: '/rath-yatra' }
 },
 { id: 4, image: '/airo-assets/images/hero/slide-4-deity.jpg' },
 { id: 5, image: '/airo-assets/images/hero/slide-5-aarti.jpg' },

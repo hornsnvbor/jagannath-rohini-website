@@ -34,6 +34,25 @@ def create_post(payload: BlogPostCreate, db: Session = Depends(get_db)):
     return post
 
 
+@router.put("/{post_id}", response_model=BlogPostOut, dependencies=[Depends(require_admin)])
+def update_post(post_id: str, payload: BlogPostCreate, db: Session = Depends(get_db)):
+    post = db.get(BlogPost, post_id)
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    existing = (
+        db.query(BlogPost)
+        .filter(BlogPost.slug == payload.slug, BlogPost.id != post_id)
+        .first()
+    )
+    if existing:
+        raise HTTPException(status_code=409, detail="Slug already exists")
+    for key, value in payload.model_dump().items():
+        setattr(post, key, value)
+    db.commit()
+    db.refresh(post)
+    return post
+
+
 @router.delete("/{post_id}", dependencies=[Depends(require_admin)])
 def delete_post(post_id: str, db: Session = Depends(get_db)):
     post = db.get(BlogPost, post_id)

@@ -484,6 +484,9 @@ export default function AdminDashboard() {
       return { name: name || '', [valueKey]: rest.join('\t') || '' } as { name: string } & Record<'time' | 'date', string>;
     }).filter((x) => x.name);
 
+  const slugify = (s: string): string =>
+    s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80);
+
   const handleSaveTimings = async () => {
     setBusy(true);
     try {
@@ -793,10 +796,13 @@ export default function AdminDashboard() {
               <div className="flex gap-3">
                 <button
                   onClick={async () => {
-                    if (!blogTitle.trim() || !blogSlug.trim()) return alert('Title and slug required');
-                    await createBlogPost({ title: blogTitle, slug: blogSlug, excerpt: blogExcerpt, content: blogContent, cover_image: blogCover });
+                    if (!blogTitle.trim()) return alert('Title is required');
+                    const slug = blogSlug.trim() || slugify(blogTitle);
+                    if (slug.length < 3) return alert('Slug must be at least 3 characters (letters, numbers, hyphens)');
+                    await createBlogPost({ title: blogTitle, slug, excerpt: blogExcerpt, content: blogContent, cover_image: blogCover, published: true });
                     fetchBlogPosts();
                     setBlogTitle(''); setBlogSlug(''); setBlogExcerpt(''); setBlogContent(''); setBlogCover('');
+                    setCurrentBlogId(null);
                     flash('Blog post created');
                   }}
                   disabled={busy}
@@ -807,10 +813,13 @@ export default function AdminDashboard() {
                 <button
                   onClick={async () => {
                     if (!currentBlogId) return alert('Select a post to update');
-    await updateBlogPost(currentBlogId, { title: blogTitle, slug: blogSlug, excerpt: blogExcerpt, content: blogContent, cover_image: blogCover });
-    fetchBlogPosts();
-    setBlogTitle(''); setBlogSlug(''); setBlogExcerpt(''); setBlogContent(''); setBlogCover('');
-    flash('Blog post updated');
+                    if (!blogTitle.trim()) return alert('Title is required');
+                    const slug = blogSlug.trim() || slugify(blogTitle);
+                    await updateBlogPost(currentBlogId, { title: blogTitle, slug, excerpt: blogExcerpt, content: blogContent, cover_image: blogCover, published: true });
+                    fetchBlogPosts();
+                    setBlogTitle(''); setBlogSlug(''); setBlogExcerpt(''); setBlogContent(''); setBlogCover('');
+                    setCurrentBlogId(null);
+                    flash('Blog post updated');
                   }}
                   disabled={busy}
                   className={fileBtnCls}
@@ -818,7 +827,7 @@ export default function AdminDashboard() {
                   Update
                 </button>
               </div>
-              <p className="text-xs text-muted-foreground mt-2">Leave slug empty to auto-generate from title, or set published:false to keep draft.</p>
+              <p className="text-xs text-muted-foreground mt-2">Leave slug empty to auto-generate from the title. Posts go live on the blog immediately.</p>
             </SectionCard>
 
             <SectionCard title={`Blog Posts (${blogPosts.length})`} badge={`${blogPosts.length} total`} delay={120}>
@@ -833,6 +842,7 @@ export default function AdminDashboard() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => {
+                          setCurrentBlogId(p.id);
                           setBlogTitle(p.title);
                           setBlogSlug(p.slug);
                           setBlogExcerpt(p.excerpt || '');

@@ -10,8 +10,6 @@ import GalleryPage from './pages/Gallery';
 import DocumentsPage from './pages/Documents';
 import BlogPage from './pages/Blog';
 import BlogPostPage from './pages/BlogPost';
-import AdminLoginPage from './pages/admin/AdminLogin';
-import AdminDashboardPage from './pages/admin';
 
 export const routes: RouteObject[] = [
   // ---- Home ----
@@ -60,9 +58,9 @@ export const routes: RouteObject[] = [
   { path: '/cancellation-refund', element: <ContentPage slug="refund" /> },
   { path: '/disclaimer', element: <ContentPage slug="disclaimer" /> },
 
-  // ---- Admin ----
-  { path: '/admin/login', element: <AdminLoginPage /> },
-  { path: '/admin', element: <AdminDashboardPage /> },
+  // NOTE: /admin and /admin/login are intentionally NOT here — they are
+  // registered as top-level routes in App.tsx (outside RootLayout) so the
+  // admin pages render WITHOUT the temple header/navbar/footer.
 
   // ---- Catch-all ----
   { path: '*', element: <NotFoundPage /> },

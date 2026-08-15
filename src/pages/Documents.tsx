@@ -15,7 +15,7 @@ function PdfViewer({ src }: { src: string }) {
         <Eye className="w-4 h-4" />
       </button>
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center"
+        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-50 items-center justify-center ${show ? 'flex' : 'hidden'}`}
         role="dialog"
         aria-modal="true"
       >

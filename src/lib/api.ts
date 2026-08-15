@@ -274,10 +274,10 @@ export interface BlogPost {
 export const getBlogPosts = () => request<BlogPost[]>('/api/blog');
 export const getBlogPost = (slug: string) => request<BlogPost>(`/api/blog/${slug}`);
 
-export const createBlogPost = (payload: { title: string; slug: string; excerpt?: string; content: string; cover_image?: string }) =>
+export const createBlogPost = (payload: { title: string; slug: string; excerpt?: string; content: string; cover_image?: string; published?: boolean }) =>
   request<BlogPost>('/api/blog', { method: 'POST', body: JSON.stringify(payload) });
 
-export const updateBlogPost = (id: string, payload: { title: string; slug: string; excerpt?: string; content: string; cover_image?: string }) =>
+export const updateBlogPost = (id: string, payload: { title: string; slug: string; excerpt?: string; content: string; cover_image?: string; published?: boolean }) =>
   request<BlogPost>(`/api/blog/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
 
 export const deleteBlogPost = (id: string) => request<{ message: string }>(`/api/blog/${id}`, { method: 'DELETE' });

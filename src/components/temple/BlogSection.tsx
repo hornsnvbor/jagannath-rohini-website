@@ -78,22 +78,6 @@ export default function BlogSection() {
             </div>
           ))}
         </div>
-
-        {/* Pagination */}
-        <div className="flex justify-center gap-2 mt-8">
-          {[1, 2, 3, 4, '…', 7].map((p, i) => (
-            <button
-              key={i}
-              className={`w-8 h-8 rounded text-sm font-medium transition ${
-                p === 1
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-background border border-border text-foreground hover:border-primary hover:text-primary'
-              }`}
-            >
-              {p}
-            </button>
-          ))}
-        </div>
       </div>
     </section>
   );

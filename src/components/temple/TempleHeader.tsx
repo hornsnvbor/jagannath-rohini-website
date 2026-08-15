@@ -23,8 +23,8 @@ const navItems = [
     label: 'Prasad Booking',
     dropdown: [
       { label: 'Annaprasad & Sweets', href: '/prasad-booking' },
-      { label: 'Day Prasad Sewan', href: '/?post_type=product&p=35263' },
-      { label: 'Night Prasad Sewan', href: '/?post_type=product&p=2515' },
+      { label: 'Day Prasad Sewan', href: '/prasad-booking' },
+      { label: 'Night Prasad Sewan', href: '/prasad-booking' },
     ],
   },
   { label: 'Society Membership', href: '/membership' },
@@ -52,8 +52,6 @@ export default function TempleHeader() {
       .catch(() => { /* backend unreachable — keep default logo */ });
     return () => { active = false; };
   }, []);
-
-  const showDonate = isHome;
 
   const toggleMobile = () => setMobileOpen((v) => !v);
   const src = logoUrl || logoPath;
@@ -99,18 +97,13 @@ export default function TempleHeader() {
             >
               {mobileOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
-            {showDonate && (
+            {isHome && (
               <Link
                 to="/donate"
                 className="hidden lg:inline-block bg-red-600 hover:bg-red-700 text-white text-sm font-bold px-6 py-3 rounded-full shadow-sm"
               >
                 Donate Now
               </Link>
-            )}
-            {!showDonate && (
-              <span className="hidden lg:inline-block text-white text-sm font-medium px-6 py-3">
-                Donate Now
-              </span>
             )}
           </div>
         </div>
@@ -186,17 +179,14 @@ export default function TempleHeader() {
                 </Link>
               )
             )}
-            <Link
-              to="/donate"
-              onClick={toggleMobile}
-              className="mt-2 bg-red-600 text-white text-center text-sm font-bold px-4 py-2 rounded-full shadow-sm"
-            >
-              Donate Now
-            </Link>
-            {!showDonate && (
-              <div className="mt-2 text-white text-center text-sm font-bold px-4 py-2">
+            {isHome && (
+              <Link
+                to="/donate"
+                onClick={toggleMobile}
+                className="mt-2 bg-red-600 text-white text-center text-sm font-bold px-4 py-2 rounded-full shadow-sm"
+              >
                 Donate Now
-              </div>
+              </Link>
             )}
           </div>
         </nav>

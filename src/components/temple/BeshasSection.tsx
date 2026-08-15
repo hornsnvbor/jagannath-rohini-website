@@ -6,21 +6,21 @@ const beshas = [
     excerpt:
       'Lord Jagannatha has been identified with Krishna and most of the rituals performed in Sreemandir are based on the life of Krishna. The Bana Bhoji Besha is one of the most elaborate and visually stunning costumes…',
     image: '/airo-assets/images/besha/bana-bhoji.jpg',
-    href: '/bana-bhoji-besha',
+    href: '/blog',
   },
   {
     title: 'Suna Besha',
     excerpt:
       'The Suna Besha is also known as the Raja Besha or the Rajarajeshwara Besha. It is one of the most spectacular and grand Beshas of Lord Jagannath, performed on special occasions with gold ornaments…',
     image: '/airo-assets/images/besha/suna-besha.jpg',
-    href: '/suna-besha',
+    href: '/blog',
   },
   {
     title: 'Tahiya Lagi Besha',
     excerpt:
       'The Tahiya Lagi Besha is performed during the Rath Yatra festival. Tahiya is a floral crown made of flowers and leaves, symbolizing the divine connection between nature and the deity…',
     image: '/airo-assets/images/besha/tahiya-lagi.jpg',
-    href: '/tahiya-lagi-besha',
+    href: '/blog',
   },
 ];
 
@@ -72,22 +72,6 @@ export default function BeshasSection() {
                 </Link>
               </div>
             </div>
-          ))}
-        </div>
-
-        {/* Pagination */}
-        <div className="flex justify-center gap-2 mt-8">
-          {[1, 2].map((p) => (
-            <button
-              key={p}
-              className={`w-8 h-8 rounded text-sm font-medium transition ${
-                p === 1
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-background border border-border text-foreground hover:border-primary hover:text-primary'
-              }`}
-            >
-              {p}
-            </button>
           ))}
         </div>
       </div>

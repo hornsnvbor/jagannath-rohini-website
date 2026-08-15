@@ -2,15 +2,15 @@ import { Link } from 'react-router-dom';
 import { Facebook, Instagram, Youtube, Twitter } from 'lucide-react';
 
 const tags = [
-{ label: 'Car Festival', href: '/tag/car-festival' },
-{ label: 'Dressing the Divine', href: '/tag/dressing-the-divine' },
-{ label: 'Events', href: '/tag/events' },
-{ label: 'Festival', href: '/tag/festival' },
-{ label: 'Jagannath Mandir Delhi', href: '/tag/jagannath-mandir-delhi' },
-{ label: 'Jagannath Mandir Hauz Khas', href: '/tag/jagannath-mandir-hauz-khas' },
-{ label: 'Rath Yatra', href: '/tag/rath-yatra' },
-{ label: 'Sabitri Amabasya', href: '/tag/sabitri-amabasya' },
-{ label: 'Sabitri Vrat', href: '/tag/sabitri-vrat' }];
+{ label: 'Car Festival', href: '/blog' },
+{ label: 'Dressing the Divine', href: '/blog' },
+{ label: 'Events', href: '/events' },
+{ label: 'Festival', href: '/festival-calendar' },
+{ label: 'Rath Yatra', href: '/rath-yatra' },
+{ label: 'Rituals', href: '/rituals' },
+{ label: 'Temple Timings', href: '/temple-timings' },
+{ label: 'History', href: '/history' },
+{ label: 'Blog', href: '/blog' }];
 
 
 export default function TempleFooter() {
@@ -29,12 +29,12 @@ export default function TempleFooter() {
             </h4>
             <div>
               <Link
-                to="/2023/07/01/niladri-bije"
+                to="/blog"
                 className="text-white hover:text-primary transition font-semibold text-sm">
                 
-                NILADRI BIJE
+                Read our Latest Posts
               </Link>
-              <p className="text-white/50 text-xs mt-1">Jul 07, 2023</p>
+              <p className="text-white/50 text-xs mt-1">Stories, festivals & updates</p>
             </div>
 
             {/* Gajapati message */}
