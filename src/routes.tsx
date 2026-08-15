@@ -10,6 +10,8 @@ import GalleryPage from './pages/Gallery';
 import DocumentsPage from './pages/Documents';
 import BlogPage from './pages/Blog';
 import BlogPostPage from './pages/BlogPost';
+import AdminLoginPage from './pages/admin/Login';
+import AdminDashboardPage from './pages/admin';
 
 export const routes: RouteObject[] = [
   // ---- Home ----
@@ -57,6 +59,10 @@ export const routes: RouteObject[] = [
   { path: '/privacy-policy', element: <ContentPage slug="privacy" /> },
   { path: '/cancellation-refund', element: <ContentPage slug="refund" /> },
   { path: '/disclaimer', element: <ContentPage slug="disclaimer" /> },
+
+  // ---- Admin ----
+  { path: '/admin/login', element: <AdminLoginPage /> },
+  { path: '/admin', element: <AdminDashboardPage /> },
 
   // ---- Catch-all ----
   { path: '*', element: <NotFoundPage /> },

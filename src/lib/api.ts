@@ -13,6 +13,14 @@ class ApiError extends Error {
   }
 }
 
+// ---- Admin auth (JWT bearer token) ----
+const TOKEN_KEY = 'admin_token';
+
+export const getAdminToken = (): string | null => localStorage.getItem(TOKEN_KEY);
+export const setAdminToken = (token: string): void => localStorage.setItem(TOKEN_KEY, token);
+export const clearAdminToken = (): void => localStorage.removeItem(TOKEN_KEY);
+export const isAdminLoggedIn = (): boolean => !!getAdminToken();
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const isForm = options.body instanceof FormData;
   const res = await fetch(`${API_BASE}${path}`, {
@@ -41,6 +49,25 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   if (res.status === 204) return undefined as T;
   return res.json();
+}
+
+/** Same as `request`, but attaches the admin Bearer token. Throws ApiError(401)
+ * if there's no token, so callers can redirect to /admin/login. */
+async function authRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const token = getAdminToken();
+  if (!token) throw new ApiError('Not authenticated', 401);
+  try {
+    return await request<T>(path, {
+      ...options,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        ...(options.headers || {}),
+      },
+    });
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 401) clearAdminToken();
+    throw err;
+  }
 }
 
 // ---- Donations ----
@@ -275,6 +302,7 @@ export interface LiveStatus {
 
 export const getLiveStatus = () => request<LiveStatus>('/api/live/status');
 
+<<<<<<< HEAD
 // ---- Admin auth (httpOnly cookie session) ----
 export const adminLogin = (email: string, password: string) =>
   request<{ authenticated: boolean; email: string }>('/api/auth/login', {
@@ -373,10 +401,39 @@ export interface SocietySubmission extends Record<string, unknown> {
 }
 
 export interface DainikSubmission extends Record<string, unknown> {
+=======
+// ---- Admin: login ----
+export const adminLogin = async (email: string, password: string): Promise<string> => {
+  const { access_token } = await request<{ access_token: string; token_type: string }>('/api/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  });
+  setAdminToken(access_token);
+  return access_token;
+};
+
+// ---- Admin: Society Membership submissions ----
+export interface SocietyMembershipRow {
+  id: string;
+  membership_type: string;
+  name: string;
+  mobile: string;
+  email: string;
+  status: string;
+  created_at: string;
+  [key: string]: unknown;
+}
+export const getSocietyMemberships = () =>
+  authRequest<SocietyMembershipRow[]>('/api/forms/society');
+
+// ---- Admin: Dainik Sewa submissions ----
+export interface DainikSewaRow {
+>>>>>>> d4daa6f (fixed homepage)
   id: string;
   name: string;
   mobile: string;
   email: string;
+<<<<<<< HEAD
   one_time_amount?: number;
   payment_method?: string;
   payment_status?: string;
@@ -390,3 +447,39 @@ export const getAdminSeva = () => request<Record<string, unknown>[]>('/api/admin
 export const getAdminUploads = () => request<Record<string, unknown>[]>('/api/admin/uploads');
 
 export { ApiError };
+=======
+  status: string;
+  created_at: string;
+  [key: string]: unknown;
+}
+export const getDainikSewas = () => authRequest<DainikSewaRow[]>('/api/forms/dainik');
+
+// ---- Admin: Donations ----
+export interface DonationRow {
+  id: string;
+  donor_name: string;
+  donor_phone: string;
+  donor_email: string;
+  cause: string;
+  amount: number;
+  status: string;
+  created_at: string;
+  [key: string]: unknown;
+}
+export const getDonations = () => authRequest<DonationRow[]>('/api/donations');
+
+/** Fetch a stored upload (photo/ID doc) as a blob URL — the endpoint requires
+ * an admin Bearer token, so it can't be used directly as an <img src>. */
+export const getUploadUrl = async (filename: string): Promise<string> => {
+  const token = getAdminToken();
+  if (!token) throw new ApiError('Not authenticated', 401);
+  const res = await fetch(`${API_BASE}/api/uploads/${filename}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new ApiError('Could not load file', res.status);
+  const blob = await res.blob();
+  return URL.createObjectURL(blob);
+};
+
+export { ApiError };
+>>>>>>> d4daa6f (fixed homepage)
