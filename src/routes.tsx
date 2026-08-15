@@ -10,7 +10,7 @@ import GalleryPage from './pages/Gallery';
 import DocumentsPage from './pages/Documents';
 import BlogPage from './pages/Blog';
 import BlogPostPage from './pages/BlogPost';
-import AdminLoginPage from './pages/admin/Login';
+import AdminLoginPage from './pages/admin/AdminLogin';
 import AdminDashboardPage from './pages/admin';
 
 export const routes: RouteObject[] = [
