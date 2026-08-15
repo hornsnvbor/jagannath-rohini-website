@@ -113,10 +113,15 @@ def generate_receipt_pdf(donation, receipt_number: str) -> bytes:
     c.setFont("Helvetica", 8)
     c.drawRightString(width - margin - 6 * mm, height - 20 * mm, "(Valid under Section 80G, Income Tax Act, 1961)")
     
+    # ---- "Jai Jagannath!" subtitle (top-right, below the 80G line) ----
+    c.setFillColor(GOLD)
+    c.setFont("Helvetica-Bold", 11)
+    c.drawRightString(width - margin - 6 * mm, height - 25 * mm, "Jai Jagannath!")
+    
     # ---- Om Symbol (top-right) ----
     c.setFillColor(GOLD)
     c.setFont("Helvetica-Bold", 22)
-    c.drawRightString(width - margin - 6 * mm, height - 30 * mm, "ॐ")
+    c.drawRightString(width - margin - 6 * mm, height - 32 * mm, "ॐ")
 
     y = height - 44 * mm
 
@@ -126,7 +131,7 @@ def generate_receipt_pdf(donation, receipt_number: str) -> bytes:
     meta_rows = [
         ("Receipt No.", receipt_number),
         ("Date", donation.updated_at.strftime("%d %B %Y") if donation.updated_at else datetime.now(timezone.utc).strftime("%d %B %Y")),
-        ("Payment Ref", donation.razorpay_payment_id or "-"),
+        ("Payment Ref (Razorpay)", donation.razorpay_payment_id or "-"),
     ]
     box_h = 18 * mm
     c.setStrokeColor(colors.HexColor("#dddddd"))
@@ -273,11 +278,19 @@ def generate_receipt_pdf(donation, receipt_number: str) -> bytes:
         text_obj2.textLine(line2)
     c.drawText(text_obj2)
 
+    # ---- Authorised Signatory block ----
+    y -= 16 * mm
+    c.setFillColor(DARK)
+    c.setFont("Helvetica", 10)
+    c.drawString(margin + 5 * mm, y, "Authorised Signatory")
+    c.setFont("Helvetica-Bold", 9.5)
+    c.drawString(margin + 5 * mm, y - 6 * mm, settings.TRUST_LEGAL_NAME)
+
     # ---- Footer ----
     c.setFillColor(MUTED)
     c.setFont("Helvetica", 7)
-    c.drawCentredString(width / 2, 14 * mm, "Jagannath Mandir, Rohini  •  Jai Jagannath 🙏")
-    c.drawCentredString(width / 2, 10 * mm, "This is a computer-generated document. | 80G Receipt")
+    c.drawCentredString(width / 2, 14 * mm, "Jagannath Mandir, Rohini  -  Jai Jagannath")
+    c.drawCentredString(width / 2, 10 * mm, "This is a computer-generated document and does not require a physical signature.")
 
     c.showPage()
     c.save()
