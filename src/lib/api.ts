@@ -312,6 +312,81 @@ export const adminLogin = async (email: string, password: string): Promise<strin
   return access_token;
 };
 
+export const adminLogout = (): void => clearAdminToken();
+
+export const adminMe = () => authRequest<{ authenticated: boolean; email?: string }>('/api/auth/me');
+
+// ---- Announcements ----
+export interface Announcement {
+  id: string;
+  title: string;
+  body: string | null;
+  active: boolean;
+  created_at: string;
+}
+
+export const getAnnouncements = () => request<Announcement[]>('/api/announcements');
+export const createAnnouncement = (payload: { title: string; body?: string; active?: boolean }) =>
+  authRequest<Announcement>('/api/admin/announcements', { method: 'POST', body: JSON.stringify(payload) });
+export const deleteAnnouncement = (id: string) =>
+  authRequest<{ message: string }>(`/api/admin/announcements/${id}`, { method: 'DELETE' });
+
+// ---- Government documents ----
+export interface DocumentItem {
+  id: string;
+  title: string;
+  category: string;
+  file_url: string | null;
+  original_name: string | null;
+  created_at: string;
+}
+
+export const getDocuments = () => request<DocumentItem[]>('/api/documents');
+export const uploadDocument = (title: string, category: string, file: File) => {
+  const fd = new FormData();
+  fd.append('title', title);
+  fd.append('category', category);
+  fd.append('file', file);
+  return authRequest<DocumentItem>('/api/admin/documents', { method: 'POST', body: fd });
+};
+export const deleteDocument = (id: string) =>
+  authRequest<{ message: string }>(`/api/admin/documents/${id}`, { method: 'DELETE' });
+
+// ---- Site settings (live stream / timings / festivals / under-construction) ----
+export interface SiteSettings {
+  live_stream: string;
+  timings: { name: string; time: string }[];
+  festivals: { name: string; date: string }[];
+  under_construction: boolean;
+  donate_banner: string;
+  logo_url: string;
+}
+
+export const getSiteSettings = () => request<SiteSettings>('/api/site/settings');
+export const updateSiteSettings = (payload: Partial<SiteSettings>) =>
+  authRequest<SiteSettings>('/api/admin/site/settings', { method: 'PUT', body: JSON.stringify(payload) });
+
+// ---- Admin logo upload ----
+export const uploadLogo = (file: File) => {
+  const fd = new FormData();
+  fd.append('file', file);
+  return authRequest<{ logo_url: string; stored_name: string }>('/api/admin/logo', { method: 'POST', body: fd });
+};
+
+// ---- Admin gallery upload ----
+export const uploadGalleryItem = (title: string, category: string, file: File) => {
+  const fd = new FormData();
+  fd.append('title', title);
+  fd.append('category', category);
+  fd.append('file', file);
+  return authRequest<{ id: string; title: string; image_url: string; category: string }>('/api/admin/gallery', {
+    method: 'POST',
+    body: fd,
+  });
+};
+export const deleteGalleryItem = (id: string) =>
+  authRequest<{ message: string }>(`/api/gallery/${id}`, { method: 'DELETE' });
+
 // ---- Admin: Society Membership submissions ----
 export interface SocietyMembershipRow {
   id: string;
@@ -323,8 +398,7 @@ export interface SocietyMembershipRow {
   created_at: string;
   [key: string]: unknown;
 }
-export const getSocietyMemberships = () =>
-  authRequest<SocietyMembershipRow[]>('/api/forms/society');
+export const getSocietySubmissions = () => authRequest<SocietyMembershipRow[]>('/api/forms/society');
 
 // ---- Admin: Dainik Sewa submissions ----
 export interface DainikSewaRow {
@@ -332,26 +406,15 @@ export interface DainikSewaRow {
   name: string;
   mobile: string;
   email: string;
-<<<<<<< HEAD
-  one_time_amount?: number;
-  payment_method?: string;
-  payment_status?: string;
-  created_at?: string;
-}
-
-export const getSocietySubmissions = () => request<SocietySubmission[]>('/api/forms/society');
-export const getDainikSubmissions = () => request<DainikSubmission[]>('/api/forms/dainik');
-export const getAdminMemberships = () => request<Record<string, unknown>[]>('/api/admin/members');
-export const getAdminSeva = () => request<Record<string, unknown>[]>('/api/admin/seva');
-export const getAdminUploads = () => request<Record<string, unknown>[]>('/api/admin/uploads');
-
-export { ApiError };
-=======
   status: string;
   created_at: string;
   [key: string]: unknown;
 }
-export const getDainikSewas = () => authRequest<DainikSewaRow[]>('/api/forms/dainik');
+export const getDainikSubmissions = () => authRequest<DainikSewaRow[]>('/api/forms/dainik');
+
+export const getAdminMemberships = () => authRequest<Record<string, unknown>[]>('/api/admin/members');
+export const getAdminSeva = () => authRequest<Record<string, unknown>[]>('/api/admin/seva');
+export const getAdminUploads = () => authRequest<Record<string, unknown>[]>('/api/admin/uploads');
 
 // ---- Admin: Donations ----
 export interface DonationRow {
@@ -381,4 +444,3 @@ export const getUploadUrl = async (filename: string): Promise<string> => {
 };
 
 export { ApiError };
->>>>>>> d4daa6f (fixed homepage)
