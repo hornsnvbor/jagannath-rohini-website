@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, X, ChevronDown } from 'lucide-react';
 
@@ -28,9 +28,17 @@ const navItems = [
 { label: 'Temple Timings', href: '/temple-timings' },
 { label: 'Contact', href: '/contact' }];
 
+// Check for custom logo in localStorage or fall back to default
+const storedLogo = localStorage.getItem('custom_logo');
+const defaultLogo = '/airo-assets/images/logo/horizontal.png';
+const logoPath = storedLogo ? storedLogo : defaultLogo;
+
 export default function TempleHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+
+  // Remove auth-related UI for now - admin login handled separately
+  const isAdminLoggedIn = localStorage.getItem('admin_logged_in') === 'true';
 
   return (
     <header className="sticky top-0 z-50 w-full shadow-md">
@@ -43,19 +51,42 @@ export default function TempleHeader() {
         <span className="flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-map-pin"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" /><circle cx="12" cy="10" r="3" /></svg>Jagannath Mandir, <strong>Rohini Sector 7</strong>, New Delhi</span>
       </div>
       <div className="flex items-center gap-2">
-        {/* Logo with yellow background and address -->
+        {/* Logo with custom path -->
         <div className="flex items-center gap-2">
           <Link to="/" className="flex items-center gap-2">
             <img
-              src="/airo-assets/images/logo/horizontal.png"
+              src={logoPath}
               alt="Jagannath Mandir Rohini"
               className="h-12 w-auto object-contain"
               loading="eager"
               fetchPriority="high" />
           </Link>
-          <div className="bg-yellow-500 text-white text-xs font-medium py-1 px-3 rounded">
-            Jagannath Mandir, Rohini Sector 7
-          </div>
+          {/* Edit profile button - shows when admin is logged in */}
+          {isAdminLoggedIn && (
+            <Button
+              className="bg-yellow-500 text-white text-xs font-medium py-1 px-3 rounded"
+              onClick={() => {
+                // Trigger file input to change logo
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.onchange = e => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      localStorage.setItem('custom_logo', reader.result);
+                      window.location.reload();
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                };
+                input.click();
+              }
+              >
+                Change Logo
+              </Button>
+          )}
         </div>
       </div>
     </div>
@@ -66,7 +97,7 @@ export default function TempleHeader() {
       {/* Logo */}
       <Link to="/" className="flex items-center py-2 shrink-0">
         <img
-          src="/airo-assets/images/logo/horizontal.png"
+          src={logoPath}
           alt="Jagannath Mandir Rohini"
           className="h-12 w-auto object-contain"
           loading="eager"

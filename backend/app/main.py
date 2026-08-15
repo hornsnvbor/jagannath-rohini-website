@@ -13,7 +13,7 @@ from app.limiter import limiter
 
 from app.config import settings
 from app.database import Base, engine, ensure_schema
-from app.routers import auth, blog, config, donations, forms, gallery, live, membership_forms, uploads
+from app.routers import admin, auth, blog, config, donations, forms, gallery, live, membership_forms, uploads
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("app")
@@ -86,6 +86,7 @@ app.include_router(forms.router)
 app.include_router(membership_forms.router)
 app.include_router(uploads.router)
 app.include_router(blog.router)
+app.include_router(admin.router)
 app.include_router(gallery.router)
 app.include_router(live.router)
 
