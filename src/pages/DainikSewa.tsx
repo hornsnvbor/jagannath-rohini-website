@@ -98,6 +98,7 @@ export default function DainikSewaPage() {
         payment_method: 'offline',
         amount_in_words: `${numberToIndianWords(ONE_TIME_AMOUNT)} Rupees Only`,
         recurring_consent: recurring,
+        auto_payment_consent: false,
         recurring_payment_method: undefined,
         recurring_start_date: recurringStartDate || undefined,
         place: form.place || undefined,

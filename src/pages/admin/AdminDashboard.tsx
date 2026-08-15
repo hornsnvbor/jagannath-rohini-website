@@ -3,15 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Image, Megaphone, FileText, Video, LogOut,
   Plus, Trash2, RefreshCw, ChevronDown, ChevronUp, CheckCircle, Upload, Eye,
-  Palette, ChevronRight, Phone, Mail, MapPin, User, BadgeCheck, FileDown,
+  Palette, ChevronRight, Phone, Mail, MapPin, User, BadgeCheck, FileDown, Edit2,
 } from 'lucide-react';
 import {
   adminLogout, deleteAnnouncement, deleteBlogPost, deleteDocument, deleteGalleryItem,
-  getAnnouncements, getDainikSubmissions, getDocuments, getGalleryItems,
+  getAnnouncements, getBlogPosts, getDainikSubmissions, getDocuments, getGalleryItems,
   getSiteSettings, getSocietySubmissions, createAnnouncement, createBlogPost,
   updateBlogPost, uploadDocument, uploadGalleryItem, updateSiteSettings, uploadLogo,
   type Announcement, type BlogPost, type DocumentItem, type GalleryItem,
-  type SiteSettings, type SocietySubmission, type DainikSubmission,
+  type SiteSettings, type SocietyMembershipRow, type DainikSewaRow,
 } from '../../lib/api';
 
 type Tab = 'membership' | 'seva' | 'gallery' | 'announcements' | 'documents' | 'live' | 'branding' | 'blog';
@@ -103,7 +103,7 @@ function DetailPanel({ title, children, icon }: { title: string; children: React
   );
 }
 
-function SocietyDetail({ row }: { row: SocietySubmission }) {
+function SocietyDetail({ row }: { row: SocietyMembershipRow }) {
   return (
     <div className="space-y-5">
       <DetailPanel title="Personal Details" icon={<User className="w-3.5 h-3.5" />}>
@@ -153,7 +153,7 @@ function SocietyDetail({ row }: { row: SocietySubmission }) {
   );
 }
 
-function DainikDetail({ row }: { row: DainikSubmission }) {
+function DainikDetail({ row }: { row: DainikSewaRow }) {
   return (
     <div className="space-y-5">
       <DetailPanel title="Personal Details" icon={<User className="w-3.5 h-3.5" />}>
@@ -211,7 +211,7 @@ function DainikDetail({ row }: { row: DainikSubmission }) {
   );
 }
 
-function SubTable({ rows, columns, detail }: { rows: (SocietySubmission | DainikSubmission)[]; columns: { key: string; label: string }[]; detail: (r: any) => React.ReactNode }) {
+function SubTable({ rows, columns, detail }: { rows: (SocietyMembershipRow | DainikSewaRow)[]; columns: { key: string; label: string }[]; detail: (r: any) => React.ReactNode }) {
   const [openId, setOpenId] = useState<string | null>(null);
   if (!rows.length) {
     return (
@@ -294,8 +294,8 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   // submissions
-  const [society, setSociety] = useState<SocietySubmission[]>([]);
-  const [dainik, setDainik] = useState<DainikSubmission[]>([]);
+  const [society, setSociety] = useState<SocietyMembershipRow[]>([]);
+  const [dainik, setDainik] = useState<DainikSewaRow[]>([]);
 
   // gallery
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
@@ -359,8 +359,8 @@ export default function AdminDashboard() {
       navigate('/admin/login', { replace: true });
       return;
     }
-    setSociety((s as SocietySubmission[]) || []);
-    setDainik((d as DainikSubmission[]) || []);
+    setSociety((s as SocietyMembershipRow[]) || []);
+    setDainik((d as DainikSewaRow[]) || []);
   }, [navigate]);
 
   const refreshGallery = useCallback(async () => {
@@ -478,16 +478,16 @@ export default function AdminDashboard() {
     }
   };
 
-  const parsePairs = (raw: string): { name: string; time: string }[] =>
+  const parsePairs = (raw: string, valueKey: 'time' | 'date') =>
     raw.split('\n').map((l) => l.trim()).filter(Boolean).map((l) => {
       const [name, ...rest] = l.split('\t');
-      return { name: name || '', time: rest.join('\t') || '' };
+      return { name: name || '', [valueKey]: rest.join('\t') || '' } as { name: string } & Record<'time' | 'date', string>;
     }).filter((x) => x.name);
 
   const handleSaveTimings = async () => {
     setBusy(true);
     try {
-      const s = await updateSiteSettings({ timings: parsePairs(timingsInput) });
+      const s = await updateSiteSettings({ timings: parsePairs(timingsInput, 'time') });
       setSettings(s);
       flash('Timings saved');
     } catch (err: any) {
@@ -500,7 +500,7 @@ export default function AdminDashboard() {
   const handleSaveFestivals = async () => {
     setBusy(true);
     try {
-      const s = await updateSiteSettings({ festivals: parsePairs(festivalsInput) });
+      const s = await updateSiteSettings({ festivals: parsePairs(festivalsInput, 'date') });
       setSettings(s);
       flash('Festival calendar saved');
     } catch (err: any) {
@@ -823,7 +823,7 @@ export default function AdminDashboard() {
 
             <SectionCard title={`Blog Posts (${blogPosts.length})`} badge={`${blogPosts.length} total`} delay={120}>
               <ul className="divide-y divide-border">
-                {blogPosts.map((p) => (
+                {blogPosts.map((p, i) => (
                   <li key={p.id} className="py-3 flex items-center justify-between gap-3 anim-fade-up admin-row rounded px-1" style={{ animationDelay: `${i * 40}ms` }}>
                     <div>
                       <p className="font-medium text-gray-800">{p.title}</p>
@@ -846,7 +846,7 @@ export default function AdminDashboard() {
                       </button>
                       <button
                         onClick={async () => {
-                          if (confirm('Delete this blog post?'));
+                          if (!confirm('Delete this blog post?')) return;
                           await deleteBlogPost(p.id);
                           fetchBlogPosts();
                           flash('Blog post deleted');
