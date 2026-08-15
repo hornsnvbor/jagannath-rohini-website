@@ -529,6 +529,7 @@ export default function AdminDashboard() {
   };
 
   const inputCls = 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition text-sm';
+  const textareaCls = 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition text-sm resize-none';
   const fileBtnCls = 'inline-flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-lg disabled:opacity-50 transition hover:scale-[1.02] active:scale-[0.98]';
 
   if (loading) {
