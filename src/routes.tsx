@@ -7,6 +7,7 @@ import DonatePage from './pages/Donate';
 import MembershipPage from './pages/SocietyMembership';
 import SevaPage from './pages/DainikSewa';
 import GalleryPage from './pages/Gallery';
+import DocumentsPage from './pages/Documents';
 import BlogPage from './pages/Blog';
 import BlogPostPage from './pages/BlogPost';
 
@@ -20,6 +21,7 @@ export const routes: RouteObject[] = [
   { path: '/membership', element: <MembershipPage /> },
   { path: '/seva', element: <SevaPage /> },
   { path: '/gallery', element: <GalleryPage /> },
+  { path: '/documents', element: <DocumentsPage /> },
 
   // ---- About Dropdown ----
   { path: '/the-supreme-god', element: <ContentPage slug="the-supreme-god" /> },

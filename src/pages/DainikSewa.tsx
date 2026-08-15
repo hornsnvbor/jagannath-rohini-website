@@ -2,10 +2,9 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   HandHeart, User, Mail, Phone, Home, Briefcase, Calendar, HeartPulse,
-  Contact, Repeat, Users, PenLine, IndianRupee, ChevronDown,
+  Contact, Repeat, Users, PenLine, IndianRupee, ChevronDown, FileText, IdCard,
 } from 'lucide-react';
-import { createDainikOrder, getRazorpayPublicKey, uploadFile, verifyDainikPayment, verifyDainikSubscription } from '../lib/api';
-import { useRazorpay } from '../lib/useRazorpay';
+import { createDainikOrder, uploadFile } from '../lib/api';
 import { FormPageShell } from '../components/FormPageShell';
 import { numberToIndianWords } from '../lib/utils';
 import { Field, FileInput, SectionTitle, inputClass, IconTextInput } from '../components/membership/FormControls';
@@ -21,7 +20,7 @@ const initialForm = {
   self_profession: '', spouse_profession: '', self_dob: '', spouse_dob: '', marriage_anniversary: '',
   child1_name: '', child1_birthday: '', child2_name: '', child2_birthday: '', child3_name: '', child3_birthday: '',
   self_blood_group: '', spouse_blood_group: '', temple_contribution: '',
-  applicant_signature: '', place: '',
+  pan: '', aadhaar: '', applicant_signature: '', place: '',
 };
 
 type FormKey = keyof typeof initialForm;
@@ -40,11 +39,8 @@ export default function DainikSewaPage() {
   const [consent, setConsent] = useState(false);
   const [showChildren, setShowChildren] = useState(true);
   const [recurring, setRecurring] = useState(false);
-  const [autoPayment, setAutoPayment] = useState(false);
   const [recurringStartDate, setRecurringStartDate] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const { loadRazorpay, isLoaded } = useRazorpay();
 
   const set = (k: FormKey, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -53,66 +49,15 @@ export default function DainikSewaPage() {
     if (!form.name.trim()) err.name = 'Name is required';
     if (!form.mobile.match(/^[6-9]\d{9}$/)) err.mobile = 'Valid 10-digit Indian mobile required';
     if (!form.email.match(/^\S+@\S+\.\S+$/)) err.email = 'Valid email required';
+    // PAN or Aadhaar — at least one is mandatory for ID verification.
+    if (!form.pan.trim() && !form.aadhaar.trim()) {
+      err.pan_aadhaar = 'Either PAN or Aadhaar number is required for ID verification';
+    }
     if (!photo) err.photo = 'Recent stamp-size photo is required';
     if (!consent) err.consent = 'Please grant consent to proceed';
-    if (recurring && !autoPayment) err.autoPayment = 'Please authorize the recurring auto-payment';
     setErrors(err);
     return Object.keys(err).length === 0;
   };
-
-  const openOrder = (rzp: any, rzpKey: string, order: { id: string; razorpay_order_id: string; amount: number }): Promise<'paid' | 'dismissed'> =>
-    new Promise((resolve) => {
-      const r = new rzp({
-        key: rzpKey,
-        amount: Math.round(order.amount * 100),
-        currency: 'INR',
-        name: 'Jagannath Mandir Rohini',
-        description: 'Dainik Sewa Membership – One-time',
-        order_id: order.razorpay_order_id,
-        prefill: { name: form.name, email: form.email, contact: form.mobile },
-        modal: { ondismiss: () => resolve('dismissed') },
-        handler: async (response: any) => {
-          try {
-            await verifyDainikPayment({
-              form_id: order.id,
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-            });
-            resolve('paid');
-          } catch {
-            resolve('dismissed');
-          }
-        },
-      });
-      r.open();
-    });
-
-  const openSubscription = (rzp: any, rzpKey: string, formId: string, subId: string): Promise<'paid' | 'dismissed'> =>
-    new Promise((resolve) => {
-      const r = new rzp({
-        key: rzpKey,
-        subscription_id: subId,
-        name: 'Jagannath Mandir Rohini',
-        description: 'Dainik Sewa – ₹200/month auto-debit',
-        prefill: { name: form.name, email: form.email, contact: form.mobile },
-        modal: { ondismiss: () => resolve('dismissed') },
-        handler: async (response: any) => {
-          try {
-            await verifyDainikSubscription({
-              form_id: formId,
-              razorpay_subscription_id: response.razorpay_subscription_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-            });
-            resolve('paid');
-          } catch {
-            resolve('dismissed');
-          }
-        },
-      });
-      r.open();
-    });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -146,48 +91,19 @@ export default function DainikSewaPage() {
         spouse_blood_group: form.spouse_blood_group || undefined,
         temple_contribution: form.temple_contribution || undefined,
         photo: uploaded?.filename,
+        pan: form.pan || undefined,
+        aadhaar: form.aadhaar || undefined,
         consent,
         applicant_signature: form.applicant_signature || undefined,
-        payment_method: 'online',
+        payment_method: 'offline',
         amount_in_words: `${numberToIndianWords(ONE_TIME_AMOUNT)} Rupees Only`,
         recurring_consent: recurring,
-        auto_payment_consent: recurring && autoPayment,
-        recurring_payment_method: recurring ? 'razorpay' : undefined,
+        recurring_payment_method: undefined,
         recurring_start_date: recurringStartDate || undefined,
         place: form.place || undefined,
       };
-      const order = await createDainikOrder(payload);
-      if (!order.razorpay_order_id) {
-        setSuccess(true);
-        setLoading(false);
-        return;
-      }
-      const rzpKey = await getRazorpayPublicKey();
-      if (!rzpKey) {
-        alert('Payment provider not configured yet. Please contact the temple office.');
-        setLoading(false);
-        return;
-      }
-      const rzp = await loadRazorpay();
-
-      const oneTimeResult = await openOrder(rzp, rzpKey, {
-        id: order.id,
-        razorpay_order_id: order.razorpay_order_id,
-        amount: order.amount,
-      });
-
-      let recurringResult: 'paid' | 'dismissed' | 'skipped' = 'skipped';
-      if (order.razorpay_subscription_id && recurring) {
-        recurringResult = await openSubscription(rzp, rzpKey, order.id, order.razorpay_subscription_id);
-      }
-
-      if (oneTimeResult === 'paid' && (recurringResult === 'paid' || recurringResult === 'skipped')) {
-        setSuccess(true);
-      } else if (oneTimeResult === 'paid') {
-        setSuccess(true);
-      } else {
-        alert('Payment was not completed. Your application is saved — please complete the payment or contact the temple office.');
-      }
+      await createDainikOrder(payload);
+      setSuccess(true);
     } catch (err: any) {
       alert(err.message || 'Something went wrong. Please try again.');
     }
@@ -197,9 +113,9 @@ export default function DainikSewaPage() {
   if (success) {
     return (
       <FormPageShell
-        title="Dainik Sewa Submitted"
+        title="Dainik Sewa Application Received"
         success={true}
-        successMessage="Jai Jagannath! Your Dainik Sewa Membership is received. Jai Jagannath!"
+        successMessage="Jai Jagannath! We have received your Dainik Sewa Membership application. Our committee will contact you soon."
       />
     );
   }
@@ -207,7 +123,7 @@ export default function DainikSewaPage() {
   return (
     <FormPageShell
       title="Dainik Sewa Membership Application"
-      subtitle="Join daily seva of Lord Jagannath. One-time membership ₹2,100 (optional recurring contribution ₹200/month)."
+      subtitle="Join daily seva of Lord Jagannath. One-time membership ₹2,100 (optional recurring contribution ₹200/month). Our committee will contact you to collect the amount."
       icon={<HandHeart className="w-6 h-6" />}
     >
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -439,6 +355,7 @@ export default function DainikSewaPage() {
   placeholder="SELECT BLOOD GROUP"
   value={form.self_blood_group}
   onChange={(e) => set('self_blood_group', e.target.value)}
+  options={BLOOD_GROUPS}
   className={inputClass()}
 />
             <IconTextInput
@@ -449,6 +366,7 @@ export default function DainikSewaPage() {
   placeholder="SELECT BLOOD GROUP"
   value={form.spouse_blood_group}
   onChange={(e) => set('spouse_blood_group', e.target.value)}
+  options={BLOOD_GROUPS}
   className={inputClass()}
 />
           </div>
@@ -468,6 +386,44 @@ export default function DainikSewaPage() {
   className={`${inputClass()} min-h-[90px]`
 }
 />
+        </section>
+
+        {/* ID Proof — PAN or Aadhaar (one required) */}
+        <section className="space-y-4">
+          <SectionTitle>ID Proof — PAN or Aadhaar (one required)</SectionTitle>
+          <p className="text-xs text-gray-400 flex items-start gap-1">
+            <IdCard className="w-4 h-4 mt-0.5 shrink-0" />
+            For identity verification, please provide at least one of PAN or Aadhaar number.
+          </p>
+          <div className="grid md:grid-cols-2 gap-4">
+            <IconTextInput
+  label="PAN Number"
+  hint="Optional if Aadhaar is provided"
+  error={errors.pan_aadhaar}
+  icon={FileText}
+  type="text"
+  placeholder="ABCDE1234F"
+  value={form.pan}
+  onChange={(e) => set('pan', e.target.value.toUpperCase())}
+  className={inputClass()}
+/>
+            <IconTextInput
+  label="Aadhaar Number"
+  hint="Optional if PAN is provided"
+  error={errors.pan_aadhaar}
+  icon={IdCard}
+  type="text"
+  placeholder="1234 5678 9012"
+  value={form.aadhaar}
+  onChange={(e) => set('aadhaar', e.target.value.replace(/[^\d]/g, '').slice(0, 12))}
+  className={inputClass()}
+/>
+          </div>
+          {errors.pan_aadhaar && (
+            <p className="text-red-500 text-sm flex items-start gap-1">
+              <IdCard className="w-4 h-4 mt-0.5 shrink-0" /> {errors.pan_aadhaar}
+            </p>
+          )}
         </section>
 
         {/* Photo */}
@@ -499,9 +455,9 @@ export default function DainikSewaPage() {
 />
         </section>
 
-        {/* Payment */}
+        {/* Amount */}
         <section className="space-y-4">
-          <SectionTitle>Payment</SectionTitle>
+          <SectionTitle>Membership Amount</SectionTitle>
 
           <div className="rounded-xl bg-primary/5 border border-primary/20 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div className="flex items-center gap-2">
@@ -514,7 +470,7 @@ export default function DainikSewaPage() {
             </div>
           </div>
 
-          {/* Recurring Dainik Sewa */}
+          {/* Optional Recurring Dainik Sewa */}
           <div className="rounded-xl border border-primary/20 overflow-hidden">
             <label className="flex items-center justify-between gap-3 px-4 py-3 cursor-pointer bg-primary/5">
               <div className="flex items-center gap-3">
@@ -527,13 +483,8 @@ export default function DainikSewaPage() {
             </label>
             {recurring && (
               <div className="px-4 py-3 space-y-3 border-t border-primary/10">
-                <label className="flex items-start gap-2 text-sm text-gray-700 cursor-pointer">
-                  <input type="checkbox" checked={autoPayment} onChange={(e) => setAutoPayment(e.target.checked)} className="mt-1 accent-primary" />
-                  <span>Authorize recurring auto-payment (auto-debit) of ₹{RECURRING_AMOUNT}/month via UPI / Card for Dainik Sewa.</span>
-                </label>
-                {errors.autoPayment && <p className="text-red-500 text-sm">{errors.autoPayment}</p>}
                 <IconTextInput
-  label="Recurring Payment Start Date"
+  label="Recurring Contribution Start Date"
   icon={Calendar}
   type="date"
   placeholder="START DATE"
@@ -542,13 +493,15 @@ export default function DainikSewaPage() {
   className={inputClass()}
 />
                 <p className="text-xs text-gray-400">
-                  On the next step you'll securely authorize the monthly auto-debit via Razorpay. You can cancel anytime.
+                  Our committee will contact you to collect the recurring contribution.
                 </p>
               </div>
             )}
           </div>
 
-          <p className="text-xs text-gray-400">You will be redirected to the Razorpay secure payment gateway.</p>
+          <p className="text-xs text-gray-400">
+            No online payment is needed right now. Our committee will contact you to collect the membership amount.
+          </p>
         </section>
 
         {/* Final */}
@@ -574,10 +527,10 @@ export default function DainikSewaPage() {
           {loading ? (
             <>
               <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              {isLoaded ? 'Processing...' : 'Loading payment...'}
+              Submitting...
             </>
           ) : (
-            'Submit & Pay'
+            'Submit Application'
           )}
         </button>
 

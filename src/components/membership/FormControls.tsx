@@ -1,4 +1,4 @@
-import { type ReactNode, type ChangeEvent } from 'react';
+import { type ReactNode, type ChangeEvent, type ComponentType } from 'react';
 
 export const inputBase =
   'w-full pl-12 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition';
@@ -19,6 +19,7 @@ export function IconTextInput({
   label,
   required,
   error,
+  hint,
   icon,
   type = 'text',
   placeholder,
@@ -27,26 +28,30 @@ export function IconTextInput({
   className,
   extraClass = '',
   asTextarea = false,
+  options = [],
 }: {
   label: string;
   required?: boolean;
   error?: string;
-  icon: string;
+  hint?: string;
+  icon: ComponentType<{ className?: string }>;
   type?: string;
   placeholder: string;
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   className: string;
   extraClass?: string;
   asTextarea?: boolean;
+  options?: string[];
 }) {
+  const Icon = icon;
   return (
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-1">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       <div className="relative">
-        <icon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <Icon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
         {asTextarea ? (
           <textarea
             value={value}
@@ -54,6 +59,19 @@ export function IconTextInput({
             className={`${inputBase} ${extraClass} ${className}`}
             placeholder={placeholder}
           />
+        ) : type === 'select' ? (
+          <select
+            value={value}
+            onChange={onChange}
+            className={`${inputBase} ${extraClass} ${className}`}
+          >
+            <option value="">{placeholder}</option>
+            {options.map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
+            ))}
+          </select>
         ) : (
           <input
             type={type}
@@ -65,6 +83,7 @@ export function IconTextInput({
         )}
       </div>
       {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+      {hint && !error && <p className="text-xs text-gray-400 mt-1">{hint}</p>}
     </div>
   );
 }

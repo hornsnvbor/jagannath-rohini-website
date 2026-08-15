@@ -5,6 +5,7 @@ import FeaturedVideos from '@/components/temple/FeaturedVideos';
 import BlogSection from '@/components/temple/BlogSection';
 import BeshasSection from '@/components/temple/BeshasSection';
 import GallerySection from '@/components/temple/GallerySection';
+import AnnouncementsBar from '@/components/temple/AnnouncementsBar';
 
 const site = 'https://jagannathmandirrohini.com';
 
@@ -74,6 +75,7 @@ export default function HomePage() {
 
       <main>
         <h1 className="sr-only">Jagannath Mandir Rohini — Sree Neelachala Seva Sangha, New Delhi</h1>
+        <AnnouncementsBar />
         <HeroCarousel />
         <LiveAartiBanner />
         <FeaturedVideos />

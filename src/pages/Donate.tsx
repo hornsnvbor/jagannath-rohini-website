@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { Heart, User, Phone, Mail, FileText, Home, IndianRupee } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Heart, User, Phone, Mail, FileText, Home, IndianRupee, Construction } from 'lucide-react';
 import { useRazorpay } from '../lib/useRazorpay';
-import { createDonation, getPublicConfig, verifyDonation } from '../lib/api';
+import { createDonation, getPublicConfig, verifyDonation, getSiteSettings, type SiteSettings } from '../lib/api';
 import { FormPageShell } from '../components/FormPageShell';
 
 const CAUSES = [
@@ -25,8 +25,15 @@ export default function DonatePage() {
     amount: 501,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [settings, setSettings] = useState<SiteSettings | null>(null);
 
   const { loadRazorpay, isLoaded } = useRazorpay();
+
+  useEffect(() => {
+    getSiteSettings()
+      .then(setSettings)
+      .catch(() => setSettings(null));
+  }, []);
 
   const getRazorpayKey = async (): Promise<string> => {
     // Runtime config from backend (public key id only) — works on every host
@@ -131,6 +138,18 @@ export default function DonatePage() {
       icon={<Heart className="w-6 h-6" />}
     >
       <form onSubmit={handleSubmit} className="space-y-5">
+        {settings?.under_construction && (
+          <div className="rounded-xl bg-amber-50 border border-amber-300 p-4 flex items-start gap-3">
+            <Construction className="w-6 h-6 text-amber-600 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-semibold text-amber-900">The temple is under construction</p>
+              <p className="text-sm text-amber-800 mt-0.5">
+                {settings.donate_banner || 'Please donate any amount of your choice to help complete the temple. Every contribution counts. Jai Jagannath!'}
+              </p>
+            </div>
+          </div>
+        )}
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Full Name <span className="text-red-500">*</span>

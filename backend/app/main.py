@@ -13,7 +13,7 @@ from app.limiter import limiter
 
 from app.config import settings
 from app.database import Base, engine, ensure_schema
-from app.routers import admin, auth, blog, config, donations, forms, gallery, live, membership_forms, uploads
+from app.routers import admin, auth, blog, config, content, donations, forms, gallery, live, membership_forms, uploads
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("app")
@@ -48,13 +48,13 @@ limiter.default_limits = [settings.RATE_LIMIT_DEFAULT]
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# CORS — only exact origins from env, never "*". Credentials off since we use
-# Bearer tokens (in headers), not cookies.
+# CORS — only exact origins from env, never "*". Credentials allowed for the
+# httpOnly admin session cookie (same-origin in production single-container).
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.allowed_origins_list,
-    allow_credentials=False,
-    allow_methods=["GET", "POST", "DELETE"],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["Authorization", "Content-Type"],
 )
 
@@ -89,6 +89,7 @@ app.include_router(blog.router)
 app.include_router(admin.router)
 app.include_router(gallery.router)
 app.include_router(live.router)
+app.include_router(content.router)
 
 
 @app.get("/api/health")

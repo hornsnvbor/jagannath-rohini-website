@@ -1,16 +1,11 @@
 import { Helmet } from '@dr.pogodin/react-helmet';
-import { type ReactElement } from 'react';
-import { ScrollRestoration } from 'react-router-dom';
+import { Outlet, ScrollRestoration } from 'react-router-dom';
 
 import TempleHeader from '@/components/temple/TempleHeader';
 import TempleFooter from '@/components/temple/TempleFooter';
 import Website from '@/layouts/Website';
 
-interface RootLayoutProps {
-  children: ReactElement;
-}
-
-export default function RootLayout({ children }: RootLayoutProps) {
+export default function RootLayout() {
   return (
     <Website>
       <Helmet>
@@ -23,7 +18,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
       </Helmet>
       <ScrollRestoration />
       <TempleHeader />
-      {children}
+      <Outlet />
       <TempleFooter />
     </Website>
   );

@@ -10,7 +10,7 @@ router = APIRouter(prefix="/api/admin", tags=["admin"])
 
 
 @router.get("/members")
-def list_members(db: Session = Depends(get_db)):
+def list_members(db: Session = Depends(get_db), admin: str = Depends(require_admin)):
     """Display all membership form submissions."""
     rows = db.query(MembershipForm).order_by(MembershipForm.created_at.desc()).all()
     return [
@@ -48,7 +48,7 @@ def list_members(db: Session = Depends(get_db)):
 
 
 @router.get("/seva")
-def list_seva(db: Session = Depends(get_db)):
+def list_seva(db: Session = Depends(get_db), admin: str = Depends(require_admin)):
     """Display all seva form submissions."""
     rows = db.query(SevaForm).order_by(SevaForm.created_at.desc()).all()
     return [
@@ -96,7 +96,7 @@ def list_seva(db: Session = Depends(get_db)):
 
 
 @router.get("/uploads")
-def list_uploads(db: Session = Depends(get_db)):
+def list_uploads(db: Session = Depends(get_db), admin: str = Depends(require_admin)):
     """Display all uploaded files/docs."""
     rows = db.query(UploadedFile).order_by(UploadedFile.created_at.desc()).all()
     return [

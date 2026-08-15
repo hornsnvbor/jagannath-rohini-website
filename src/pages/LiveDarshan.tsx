@@ -1,14 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Helmet } from '@dr.pogodin/react-helmet';
 import { Radio } from 'lucide-react';
-import { getLiveStatus, type LiveStatus } from '@/lib/api';
+import { getLiveStatus, getSiteSettings, type LiveStatus, type SiteSettings } from '@/lib/api';
 
-// Fallback: the temple's YouTube channel handle, used to embed the "live tab"
-// even when our backend can't confirm live status (e.g. YOUTUBE_API_KEY not
-// yet configured). Update this to the real channel handle.
-const CHANNEL_HANDLE = 'Jeetendra.Happy-777_Life';
+const FALLBACK_CHANNEL = 'Jeetendra.Happy-777_Life';
 
-const aartiSchedule = [
+const DEFAULT_TIMINGS = [
   { name: 'Mangala Aarti', time: '5:30 AM' },
   { name: 'Madhyanha Bhoga Aarti', time: '12:00 PM' },
   { name: 'Sandhya Aarti', time: '7:00 PM' },
@@ -17,12 +14,23 @@ const aartiSchedule = [
 
 export default function LiveDarshanPage() {
   const [status, setStatus] = useState<LiveStatus | null>(null);
+  const [settings, setSettings] = useState<SiteSettings | null>(null);
 
   useEffect(() => {
     getLiveStatus()
       .then(setStatus)
-      .catch(() => setStatus({ is_live: false, video_id: null, title: null }));
+      .catch(() => setStatus({ is_live: false, video_id: null, title: null, embed_url: null }));
+    getSiteSettings()
+      .then(setSettings)
+      .catch(() => setSettings(null));
   }, []);
+
+  const embedUrl =
+    status?.embed_url ||
+    (status?.video_id ? `https://www.youtube.com/embed/${status.video_id}` : null) ||
+    (status?.is_live ? `https://www.youtube.com/embed/live_stream?channel=${FALLBACK_CHANNEL}` : null);
+
+  const timings = settings && settings.timings && settings.timings.length > 0 ? settings.timings : DEFAULT_TIMINGS;
 
   return (
     <>
@@ -42,7 +50,7 @@ export default function LiveDarshanPage() {
           Watch live darshan from Jagannath Mandir, Rohini. Jai Jagannath! 🙏
         </p>
 
-        {status?.is_live && (
+        {status?.is_live && status?.title && (
           <div className="flex items-center gap-2 mb-4">
             <span className="relative flex h-3 w-3">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
@@ -54,25 +62,29 @@ export default function LiveDarshanPage() {
           </div>
         )}
 
-        <div className="aspect-video w-full rounded-lg overflow-hidden shadow-xl bg-temple-dark">
-          <iframe
-            src={
-              status?.video_id
-                ? `https://www.youtube.com/embed/${status.video_id}`
-                : `https://www.youtube.com/embed/live_stream?channel=${CHANNEL_HANDLE}`
-            }
-            title="Jagannath Mandir Rohini — Live Darshan"
-            className="w-full h-full"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-        </div>
+        {embedUrl ? (
+          <div className="aspect-video w-full rounded-lg overflow-hidden shadow-xl bg-temple-dark">
+            <iframe
+              src={embedUrl}
+              title="Jagannath Mandir Rohini — Live Darshan"
+              className="w-full h-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        ) : (
+          <div className="aspect-video w-full rounded-lg overflow-hidden shadow-xl bg-temple-dark flex items-center justify-center">
+            <p className="text-white/70 text-sm px-4 text-center">
+              Live stream will appear here when the temple goes live.
+            </p>
+          </div>
+        )}
 
         <div className="mt-10 grid sm:grid-cols-2 gap-4">
           <div>
             <h2 className="text-xl font-heading font-semibold text-temple-dark mb-3">Daily Aarti Timings</h2>
             <ul className="divide-y divide-border rounded-lg border border-border overflow-hidden bg-card">
-              {aartiSchedule.map((a) => (
+              {timings.map((a) => (
                 <li key={a.name} className="flex justify-between px-4 py-3 text-sm">
                   <span>{a.name}</span>
                   <span className="font-semibold text-primary">{a.time}</span>
@@ -83,9 +95,22 @@ export default function LiveDarshanPage() {
           <div>
             <h2 className="text-xl font-heading font-semibold text-temple-dark mb-3">Not live right now?</h2>
             <p className="text-sm text-muted-foreground">
-              The player above automatically shows our next live stream once it begins, or the latest
-              uploaded aarti video otherwise. Subscribe on YouTube to get notified the moment we go live.
+              The player above automatically shows our live stream once it begins. Subscribe on YouTube to get
+              notified the moment we go live.
             </p>
+            {settings && settings.festivals && settings.festivals.length > 0 && (
+              <div className="mt-6">
+                <h2 className="text-xl font-heading font-semibold text-temple-dark mb-3">Upcoming Festivals</h2>
+                <ul className="divide-y divide-border rounded-lg border border-border overflow-hidden bg-card">
+                  {settings.festivals.map((f) => (
+                    <li key={f.name} className="flex justify-between px-4 py-3 text-sm">
+                      <span>{f.name}</span>
+                      <span className="font-semibold text-primary">{f.date}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       </main>

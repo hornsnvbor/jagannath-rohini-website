@@ -4,8 +4,7 @@ import {
   Users, User, Phone, Mail, FileText, Home, Briefcase, Calendar,
   Type, HeartPulse, UserPlus, IdCard, IndianRupee, Handshake, PenLine,
 } from 'lucide-react';
-import { createSocietyOrder, getRazorpayPublicKey, uploadFile, verifySocietyPayment } from '../lib/api';
-import { useRazorpay } from '../lib/useRazorpay';
+import { createSocietyOrder, uploadFile } from '../lib/api';
 import { FormPageShell } from '../components/FormPageShell';
 import { numberToIndianWords } from '../lib/utils';
 import { Field, FileInput, SectionTitle, inputClass, IconTextInput } from '../components/membership/FormControls';
@@ -18,6 +17,8 @@ const MEMBERSHIP_TYPES: { value: string; label: string; amount: number }[] = [
   { value: 'advisor', label: 'Advisor', amount: 251000 },
 ];
 
+const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
+
 const AMOUNTS: Record<string, number> = Object.fromEntries(
   MEMBERSHIP_TYPES.map((t) => [t.value, t.amount]),
 );
@@ -27,7 +28,7 @@ const initialForm = {
   name: '', father_husband_name: '', gotra: '', dob: '', blood_group: '',
   residence_address: '', office_address: '',
   residence_telephone: '', office_telephone: '', mobile: '', fax: '', email: '',
-  pan: '', occupation_designation: '',
+  pan: '', aadhaar: '', occupation_designation: '',
   introducing_member_name: '', introducing_member_mobile: '',
   place: '', member_signature: '',
 };
@@ -44,8 +45,6 @@ export default function SocietyMembershipPage() {
   const [terms, setTerms] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const { loadRazorpay, isLoaded } = useRazorpay();
-
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
   const amount = AMOUNTS[form.membership_type];
 
@@ -54,6 +53,10 @@ export default function SocietyMembershipPage() {
     if (!form.name.trim()) err.name = 'Name is required';
     if (!form.mobile.match(/^[6-9]\d{9}$/)) err.mobile = 'Valid 10-digit Indian mobile required';
     if (!form.email.match(/^\S+@\S+\.\S+$/)) err.email = 'Valid email required';
+    // PAN or Aadhaar — at least one is mandatory for ID verification.
+    if (!form.pan.trim() && !form.aadhaar.trim()) {
+      err.pan_aadhaar = 'Either PAN or Aadhaar number is required for ID verification';
+    }
     if (!files.member_photo) err.member_photo = 'Member photo is required';
     if (!terms) err.terms = 'Please accept the declaration to proceed';
     setErrors(err);
@@ -92,6 +95,7 @@ export default function SocietyMembershipPage() {
         fax: form.fax || undefined,
         email: form.email,
         pan: form.pan || undefined,
+        aadhaar: form.aadhaar || undefined,
         occupation_designation: form.occupation_designation || undefined,
         introducing_member_name: form.introducing_member_name || undefined,
         introducing_member_mobile: form.introducing_member_mobile || undefined,
@@ -99,62 +103,26 @@ export default function SocietyMembershipPage() {
         spouse_photo: uploaded.spouse_photo,
         pan_document: uploaded.pan_document,
         aadhaar_document: uploaded.aadhaar_document,
-        payment_method: 'online',
+        payment_method: 'offline',
         amount_in_words: `${numberToIndianWords(amount)} Rupees Only`,
         place: form.place || undefined,
         member_signature: form.member_signature || undefined,
         terms_accepted: terms,
       };
-      const order = await createSocietyOrder(payload);
-      if (!order.razorpay_order_id) {
-        setSuccess(true);
-        setLoading(false);
-        return;
-      }
-      const rzpKey = await getRazorpayPublicKey();
-      if (!rzpKey) {
-        alert('Payment provider not configured yet. Please contact the temple office.');
-        setLoading(false);
-        return;
-      }
-      const rzp = await loadRazorpay();
-      const pay = new rzp({
-        key: rzpKey,
-        amount: Math.round(amount * 100),
-        currency: 'INR',
-        name: 'Jagannath Mandir Rohini',
-        description: `Society Membership – ${MEMBERSHIP_TYPES.find((t) => t.value === form.membership_type)?.label}`,
-        order_id: order.razorpay_order_id,
-        prefill: { name: form.name, email: form.email, contact: form.mobile },
-        modal: { ondismiss: () => setLoading(false) },
-        handler: async (response: any) => {
-          try {
-            await verifySocietyPayment({
-              form_id: order.id,
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-            });
-            setSuccess(true);
-          } catch {
-            alert('Payment received, but confirmation failed. Our team will contact you.');
-          }
-          setLoading(false);
-        },
-      });
-      pay.open();
+      await createSocietyOrder(payload);
+      setSuccess(true);
     } catch (err: any) {
       alert(err.message || 'Something went wrong. Please try again.');
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   if (success) {
     return (
       <FormPageShell
-        title="Membership Submitted"
+        title="Membership Application Received"
         success={true}
-        successMessage="Jai Jagannath! Your Society Membership application and payment are received. Our committee will contact you soon."
+        successMessage="Jai Jagannath! We have received your Society Membership application and the selected amount will be collected from you. Our committee will contact you soon."
       />
     );
   }
@@ -162,7 +130,7 @@ export default function SocietyMembershipPage() {
   return (
     <FormPageShell
       title="Society Membership Application"
-      subtitle="Join the Jagannath Mandir Rohini family. Select a membership type — payment is collected securely online, and ID proof plus photo are required."
+      subtitle="Join the Jagannath Mandir Rohini family. Select a membership type, fill in your details — our committee will contact you to collect the membership amount."
       icon={<Users className="w-6 h-6" />}
     >
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -249,6 +217,7 @@ export default function SocietyMembershipPage() {
   placeholder="SELECT BLOOD GROUP"
   value={form.blood_group}
   onChange={(e) => set('blood_group', e.target.value)}
+  options={BLOOD_GROUPS}
   className={inputClass()}
 />
           </div>
@@ -340,17 +309,6 @@ export default function SocietyMembershipPage() {
           <SectionTitle>Professional Details</SectionTitle>
           <div className="grid md:grid-cols-2 gap-4">
             <IconTextInput
-  label="PAN Number"
-  hint="Optional, for 80G receipt"
-  error={errors.pan}
-  icon={FileText}
-  type="text"
-  placeholder="ABCDE1234F"
-  value={form.pan}
-  onChange={(e) => set('pan', e.target.value.toUpperCase())}
-  className={inputClass()}
-/>
-            <IconTextInput
   label="Occupation & Designation"
   error={errors.occupation_designation}
   icon={Briefcase}
@@ -361,6 +319,44 @@ export default function SocietyMembershipPage() {
   className={inputClass()}
 />
           </div>
+        </section>
+
+        {/* ID Proof (PAN or Aadhaar — one required) */}
+        <section className="space-y-4">
+          <SectionTitle>ID Proof — PAN or Aadhaar (one required)</SectionTitle>
+          <p className="text-xs text-gray-400 flex items-start gap-1">
+            <IdCard className="w-4 h-4 mt-0.5 shrink-0" />
+            For identity verification, please provide at least one of PAN or Aadhaar number.
+          </p>
+          <div className="grid md:grid-cols-2 gap-4">
+            <IconTextInput
+  label="PAN Number"
+  hint="Optional if Aadhaar is provided"
+  error={errors.pan_aadhaar}
+  icon={FileText}
+  type="text"
+  placeholder="ABCDE1234F"
+  value={form.pan}
+  onChange={(e) => set('pan', e.target.value.toUpperCase())}
+  className={inputClass()}
+/>
+            <IconTextInput
+  label="Aadhaar Number"
+  hint="Optional if PAN is provided"
+  error={errors.pan_aadhaar}
+  icon={IdCard}
+  type="text"
+  placeholder="1234 5678 9012"
+  value={form.aadhaar}
+  onChange={(e) => set('aadhaar', e.target.value.replace(/[^\d]/g, '').slice(0, 12))}
+  className={inputClass()}
+/>
+          </div>
+          {errors.pan_aadhaar && (
+            <p className="text-red-500 text-sm flex items-start gap-1">
+              <IdCard className="w-4 h-4 mt-0.5 shrink-0" /> {errors.pan_aadhaar}
+            </p>
+          )}
         </section>
 
         {/* Introducing Member */}
@@ -421,20 +417,22 @@ export default function SocietyMembershipPage() {
           </p>
         </section>
 
-        {/* Payment */}
+        {/* Membership Amount */}
         <section className="space-y-4">
-          <SectionTitle>Payment — Membership</SectionTitle>
+          <SectionTitle>Membership Amount</SectionTitle>
           <div className="rounded-xl bg-primary/5 border border-primary/20 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <IndianRupee className="w-5 h-5 text-primary" />
-              <span className="font-medium text-gray-700">Membership Amount</span>
+              <span className="font-medium text-gray-700">Selected Membership Amount</span>
             </div>
             <div className="text-right">
               <span className="text-2xl font-bold text-primary">₹{amount.toLocaleString('en-IN')}</span>
               <p className="text-xs text-gray-500">{numberToIndianWords(amount)} Rupees Only</p>
             </div>
           </div>
-          <p className="text-xs text-gray-400">You will be redirected to the Razorpay secure payment gateway.</p>
+          <p className="text-xs text-gray-400">
+            No online payment is needed right now. Our committee will contact you to collect the membership amount.
+          </p>
         </section>
 
         {/* Final */}
@@ -480,10 +478,10 @@ export default function SocietyMembershipPage() {
           {loading ? (
             <>
               <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              {isLoaded ? 'Processing...' : 'Loading payment...'}
+              Submitting...
             </>
           ) : (
-            'Submit & Pay'
+            'Submit Application'
           )}
         </button>
 

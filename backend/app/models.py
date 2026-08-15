@@ -116,6 +116,7 @@ class SocietyMembershipForm(Base):
     email: Mapped[str] = mapped_column(String(255))
 
     pan: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    aadhaar: Mapped[str | None] = mapped_column(String(20), nullable=True)
     occupation_designation: Mapped[str | None] = mapped_column(String(160), nullable=True)
 
     introducing_member_name: Mapped[str | None] = mapped_column(String(120), nullable=True)
@@ -180,6 +181,9 @@ class DainikSewaForm(Base):
 
     self_blood_group: Mapped[str | None] = mapped_column(String(20), nullable=True)
     spouse_blood_group: Mapped[str | None] = mapped_column(String(20), nullable=True)
+
+    pan: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    aadhaar: Mapped[str | None] = mapped_column(String(20), nullable=True)
 
     temple_contribution: Mapped[str | None] = mapped_column(Text, nullable=True)
 
@@ -269,3 +273,52 @@ class UploadedFile(Base):
     size_bytes: Mapped[int] = mapped_column()
     original_name: Mapped[str | None] = mapped_column(String(120), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class PublicFile(Base):
+    """File that IS meant to be served publicly (gallery photos, government
+    documents/PDFs). Kept separate from UploadedFile (membership ID proofs,
+    which stay admin-only). Same storage pattern: bytes in the DB."""
+    __tablename__ = "public_files"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    stored_name: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    file_data: Mapped[bytes] = mapped_column(LargeBinary)
+    content_type: Mapped[str] = mapped_column(String(80), default="application/octet-stream")
+    size_bytes: Mapped[int] = mapped_column()
+    original_name: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class Announcement(Base):
+    """Home-page announcement managed from the admin panel."""
+    __tablename__ = "announcements"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    title: Mapped[str] = mapped_column(String(200))
+    body: Mapped[str | None] = mapped_column(Text, nullable=True)
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class Document(Base):
+    """Government/trust documents (PDFs) uploaded from the admin panel and
+    shown on the public Documents page. File bytes live in PublicFile."""
+    __tablename__ = "documents"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    title: Mapped[str] = mapped_column(String(200))
+    category: Mapped[str] = mapped_column(String(80), default="general")
+    file_name: Mapped[str] = mapped_column(String(64), unique=True)  # PublicFile.stored_name
+    original_name: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class SiteSetting(Base):
+    """Key/value admin-editable site settings: live stream, aarti timings,
+    festival calendar, under-construction banner text, etc."""
+    __tablename__ = "site_settings"
+
+    key: Mapped[str] = mapped_column(String(64), primary_key=True)
+    value: Mapped[str] = mapped_column(Text, default="")
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, onupdate=_now)

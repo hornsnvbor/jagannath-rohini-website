@@ -23,6 +23,7 @@ __pycache__/
 *.egg-info/
 backend/temple.db
 *.sqlite3
+*_smoke.db
 
 # Uploaded files (photos / ID proofs) — never commit user data
 backend/uploads/

@@ -23,6 +23,21 @@ _ADDITIVE_MIGRATIONS = (
         "receipt_number",
         "VARCHAR(80)",
     ),
+    (
+        "society_membership_forms",
+        "aadhaar",
+        "VARCHAR(20)",
+    ),
+    (
+        "dainik_sewa_forms",
+        "pan",
+        "VARCHAR(10)",
+    ),
+    (
+        "dainik_sewa_forms",
+        "aadhaar",
+        "VARCHAR(20)",
+    ),
 )
 
 

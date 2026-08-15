@@ -115,6 +115,7 @@ class SocietyMembershipCreate(BaseModel):
     fax: str | None = Field(default=None, max_length=30)
     email: EmailStr
     pan: str | None = None
+    aadhaar: str | None = None
     occupation_designation: str | None = Field(default=None, max_length=160)
     introducing_member_name: str | None = Field(default=None, max_length=120)
     introducing_member_mobile: str | None = Field(default=None, max_length=20)
@@ -182,6 +183,8 @@ class DainikSewaCreate(BaseModel):
     child3_birthday: str | None = Field(default=None, max_length=20)
     self_blood_group: str | None = Field(default=None, max_length=20)
     spouse_blood_group: str | None = Field(default=None, max_length=20)
+    pan: str | None = None
+    aadhaar: str | None = None
     temple_contribution: str | None = Field(default=None, max_length=2000)
     photo: str | None = Field(default=None, max_length=120)
     consent: bool = Field(default=False)
@@ -276,3 +279,51 @@ class AdminLogin(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+
+# ---- Site content (announcements / documents / settings) ----
+
+
+class AnnouncementCreate(BaseModel):
+    title: str = Field(min_length=2, max_length=200)
+    body: str | None = Field(default=None, max_length=2000)
+    active: bool = True
+
+
+class AnnouncementOut(BaseModel):
+    id: str
+    title: str
+    body: str | None
+    active: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class DocumentOut(BaseModel):
+    id: str
+    title: str
+    category: str
+    file_url: str | None = None
+    original_name: str | None = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class SettingsOut(BaseModel):
+    live_stream: str = ""          # admin-set YouTube embed/video id or URL
+    timings: list[dict] = []       # [{"name": ..., "time": ...}]
+    festivals: list[dict] = []     # [{"name": ..., "date": ...}]
+    under_construction: bool = False
+    donate_banner: str = ""
+
+
+class SettingsUpdate(BaseModel):
+    live_stream: str | None = None
+    timings: list[dict] | None = None
+    festivals: list[dict] | None = None
+    under_construction: bool | None = None
+    donate_banner: str | None = None
