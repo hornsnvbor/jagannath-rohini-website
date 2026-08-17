@@ -152,7 +152,7 @@ export const DEFAULT_SITE_CONTENT: Record<string, unknown> = {
 
   header_contact: {
     phone: '7011510512',
-    email: 'neelachalasevasangha@rediffmail.com',
+    email: 'info@jagannathmandirrohini.com',
   } as HeaderContact,
 
   content_pages: CONTENT_PAGES as ContentPages,

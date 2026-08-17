@@ -96,6 +96,40 @@ For exact directions, please use Google Maps or contact the temple office at +91
 `,
   },
 
+  'temple-construction': {
+    title: 'New Temple Construction',
+    content: `
+Our devotees' dream of a grand, permanent temple for Lord Jagannath is taking shape. The **new temple is currently under construction** at its permanent location in Rohini, and we need your support to complete it.
+
+## The New Temple
+
+- **Permanent Location:** A 3/16, Rohini Sector 7, New Delhi – 110085
+- **Present Location (until construction completes):** DAMB Apartments, Sector 11 Extn, Sector 11, Rohini
+
+Once complete, the new temple will be a magnificent abode for Lord Jagannath, Balabhadra and Devi Subhadra — with daily rituals, festivals and community seva for generations of devotees to come.
+
+## How You Can Help
+
+Every contribution, big or small, brings the temple one step closer to completion. Your donation goes directly towards the construction of the new temple.
+
+<p style="text-align:center;margin:24px 0">
+  <a href="/donate?cause=temple_construction" style="display:inline-block;background:#f97316;color:#ffffff;padding:14px 32px;border-radius:9999px;font-weight:700;font-size:1.05rem;text-decoration:none">🙏 Contribute to Build New Temple Together!</a>
+</p>
+
+## Donation Options
+
+- **Online Donation** – Pay securely through our website using Razorpay (UPI, cards, netbanking)
+- **Bank Transfer** – Details available at the temple office
+- **In Person** – Visit the temple and contribute directly
+
+For 80G tax exemption receipts, please provide your PAN and complete address at the time of donation.
+
+> *"Together, let us build a sacred home for Lord Jagannath."*
+
+**Jai Jagannath!**
+`,
+  },
+
   'contact': {
     title: 'Contact Us',
     content: `
