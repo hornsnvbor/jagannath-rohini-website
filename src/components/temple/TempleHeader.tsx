@@ -65,7 +65,7 @@ export default function TempleHeader() {
             <div className="text-yellow-950">
               <p className="text-base lg:text-lg font-bold leading-tight">Jagannath Mandir</p>
               <p className="text-xs lg:text-sm font-medium leading-snug">
-                Rohini Sector 7, New Delhi
+                Sector 11, Rohini, New Delhi
               </p>
               <a href={`tel:${contact.phone}`} className="flex items-center gap-1 text-xs lg:text-sm font-medium hover:underline mt-1">
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-phone">

@@ -29,7 +29,7 @@ The temple follows the **Chappan Bhog** tradition, offering 56 different food it
   'about-the-temple': {
     title: 'About the Temple – Jagannath Mandir Rohini',
     content: `
-Jagannath Mandir Rohini is a sacred Hindu temple dedicated to Lord Jagannath, located in Sector 7, Rohini, New Delhi. The temple was established in **2006** by the Sree Neelachala Seva Sangha, a charitable trust dedicated to propagating the culture and traditions of Lord Jagannath.
+Jagannath Mandir Rohini is a sacred Hindu temple dedicated to Lord Jagannath, located in Sector 11, Rohini, New Delhi. The temple was established in **2006** by the Sree Neelachala Seva Sangha, a charitable trust dedicated to propagating the culture and traditions of Lord Jagannath.
 
 ## Architecture & Design
 
@@ -56,21 +56,28 @@ The temple is open to all devotees regardless of caste, creed, or religion. The 
   'location': {
     title: 'Location – How to Reach',
     content: `
-Jagannath Mandir Rohini is conveniently located in the heart of Rohini, making it easily accessible by road and metro.
+Jagannath Mandir Rohini is conveniently located in Sector 11, making it easily accessible by road and metro.
 
 ## Address
 
 **Jagannath Mandir Rohini**  
-A 3/16, Rohini Sector 7, New Delhi – 110085
+DAMB Apartments, Sector 11 Extn, Sector 11, Rohini, New Delhi – 110085
+
+<p style="text-align:center;margin:24px 0">
+  <a href="https://maps.app.goo.gl/c3H7sspXVhM2U4Wo7?g_st=aw" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#f97316;color:#ffffff;padding:12px 28px;border-radius:9999px;font-weight:700;text-decoration:none">📍 Get Directions – Open in Google Maps</a>
+</p>
+
+## Map
+
+<iframe src="https://www.google.com/maps?q=P4P3%2B633%20Jagannath%20Mandir%2C%20Sector%2011%2C%20Rohini%2C%20Delhi%20110085&output=embed" width="100%" height="400" style="border:0;border-radius:12px" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade" title="Jagannath Mandir Rohini – Google Map"></iframe>
 
 ## How to Reach
 
 ### By Metro
-- **Nearest Station:** Rohini East (Red Line) – about 1.5 km from the temple.
-- Auto-rickshaw or cab available from the station.
+- **Nearest Station:** Rohini East / Pitampura (Red Line) — short auto-rickshaw or cab ride from the station.
 
 ### By Bus
-Several DTC buses ply to Rohini Sector 7. The nearest bus stop is **Rohini Sector 7 Market**.
+Several DTC buses ply towards Rohini. The nearest bus stop is near the **Sector 11 market / DAMB Apartments**.
 
 ### By Road
 - From Delhi city center: ~20 km via Outer Ring Road.
@@ -79,7 +86,7 @@ Several DTC buses ply to Rohini Sector 7. The nearest bus stop is **Rohini Secto
 
 ## Landmarks
 
-The temple is located near the Rohini Sector 7 market, **behind the State Bank of India branch**.
+The temple is located at **DAMB Apartments, Sector 11 Extn**, near the Sector 11 market.
 
 ## Parking
 
@@ -97,7 +104,7 @@ We would love to hear from you. For any queries, feedback, or seva bookings, ple
 ## Temple Address
 
 **Jagannath Mandir Rohini**  
-A 3/16, Rohini Sector 7, New Delhi – 110085
+DAMB Apartments, Sector 11 Extn, Sector 11, Rohini, New Delhi – 110085
 
 ## Contact Details
 
