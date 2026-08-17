@@ -140,7 +140,7 @@ export const DEFAULT_SITE_CONTENT: Record<string, unknown> = {
   ] as BeshaCard[],
 
   footer: {
-    address: 'A 3/16, Rohini Sector 7, New Delhi 110085',
+    address: 'DAMB Apartments, Sector 11 Extn, Sector 11, Rohini, New Delhi 110085',
     email: 'neelachalasevasangha@rediffmail.com',
     email2: 'odiasamajrohini@gmail.com',
     prasadPhone: '7011510512',
