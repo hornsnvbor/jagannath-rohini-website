@@ -29,7 +29,7 @@ The temple follows the **Chappan Bhog** tradition, offering 56 different food it
   'about-the-temple': {
     title: 'About the Temple – Jagannath Mandir Rohini',
     content: `
-Jagannath Mandir Rohini is a sacred Hindu temple dedicated to Lord Jagannath, located in Sector 11, Rohini, New Delhi. The temple was established in **2006** by the Sree Neelachala Seva Sangha, a charitable trust dedicated to propagating the culture and traditions of Lord Jagannath.
+Jagannath Mandir Rohini is a sacred Hindu temple dedicated to Lord Jagannath, presently located in Sector 11, Rohini, New Delhi. It is managed by **Oriya Samaj (Regd. No. S/37924/2000)**, a registered society dedicated to propagating the culture and traditions of Lord Jagannath. A grand permanent temple is under construction at its permanent location in Rohini Sector 7.
 
 ## Architecture & Design
 
@@ -173,30 +173,29 @@ You can also fill out the contact form on our website, and we will get back to y
   // ============================================
 
   'history': {
-    title: 'Splendid History of Jagannath Temple and Shree Neelachal Seva Sangh',
+    title: 'Splendid History of Jagannath Temple and Oriya Samaj',
     content: `
-The Jagannath Mandir Rohini is the culmination of a dream that began in **2006** when a group of devotees from Odisha, living in Delhi, felt the need for a temple dedicated to Lord Jagannath in the city.
+The Shree Jagannath Mandir Rohini is the culmination of a long-cherished dream of the Odia community in Delhi to have a temple dedicated to Lord Jagannath, replicating the spiritual ambiance of the Puri Jagannath Temple.
 
 ## The Beginning
 
-The Sree Neelachala Seva Sangha was formed with the mission to build a temple that would replicate the spiritual ambiance of the Puri Jagannath Temple. After years of dedicated effort, the temple was established in Rohini Sector 7.
+**Oriya Samaj (Regd. No. S/37924/2000)** is the registered society that manages the temple. For over two decades, its members have worked tirelessly to bring the sacred traditions of Puri — daily rituals, aartis, festivals and the famous Rath Yatra — to the national capital.
 
 ## The Journey
 
-| Year | Milestone |
-|------|-----------|
-| 2006 | Formation of Sree Neelachala Seva Sangha |
-| 2008 | Land acquisition in Rohini |
-| 2010 | Foundation stone laid |
-| 2015 | Temple construction begins |
-| 2023 | Pratishtha (consecration) ceremony |
-| 2024 | Full operations with daily rituals |
+| Milestone | Details |
+|-----------|---------|
+| Registration | Oriya Samaj registered as a society (Regd. No. S/37924/2000) |
+| Present Premises | The temple currently functions from DAMB Apartments, Sector 11 Extn, Rohini |
+| Permanent Temple | A grand permanent temple is under construction at Sector 7, Rohini |
 
-## The Grand Pratishtha
+## The Road Ahead
 
-The consecration ceremony (Pratishtha) was held in **February 2023** with grand celebrations, marking a new chapter in the spiritual history of Delhi. Thousands of devotees participated in the historic event.
+The temple community's biggest dream — a grand, permanent temple for Lord Jagannath — is taking shape at its permanent location in Rohini Sector 7. Devotees can contribute towards the construction through the website's **Temple Construction Fund**, and donations to the trust are eligible for **80G tax benefits**.
 
 Today, the temple stands as a testament to the devotion and unity of the Odia community in the capital. It serves as a cultural hub where traditions are preserved and passed on to future generations.
+
+**Jai Jagannath!**
 `,
   },
 
@@ -224,33 +223,43 @@ Every day, the temple conducts the **Dhoop Aarti** and **Sandhya Aarti**, which 
   },
 
   // ============================================
-  // SREE NEELACHALA SEVA SANGHA
+  // ORIYA SAMAJ
   // ============================================
 
   'about-us': {
-    title: 'About Us – Sree Neelachala Seva Sangha',
+    title: 'About Us – Oriya Samaj',
     content: `
-Sree Neelachala Seva Sangha is a registered charitable trust founded in **2006** with the aim of spreading the message of Lord Jagannath and preserving Odia culture in Delhi.
+**Oriya Samaj (Regd. No. S/37924/2000)** is a registered society serving the Odia community of Delhi, and it manages the Shree Jagannath Mandir Rohini. The society was established with the aim of spreading the message of Lord Jagannath and preserving Odia culture in the capital.
 
 ## Our Mission
 
-The trust is composed of devoted individuals who work tirelessly to:
+The society is composed of devoted members who work tirelessly to:
 
 - **Manage** the temple activities and daily rituals
 - **Conduct** religious ceremonies and cultural events
 - **Organize** social welfare activities
+- **Build** the new permanent temple for Lord Jagannath at Rohini Sector 7
 
 ## Social Welfare Activities
 
-- **Annadaan (Free Meal)** – Daily distribution of free meals to the underprivileged. ₹5/day scheme provides meals to needy devotees
+- **Annadaan (Free Meal)** – Sponsorship of free meals (Mahaprasad) for the underprivileged and needy devotees
 - **Medical Camps** – Periodic health check-up camps for the community
-- **Educational Support** – Scholarships and support for underprivileged students
+- **Educational Support** – Support for underprivileged students
+
+## Contact
+
+- **Address:** Shree Jagannath Mandir Rohini, DAMB Apartments, Sector 11 Extn, Sector 11, Rohini, New Delhi – 110085
+- **Email:** info@jagannathmandirrohini.com
+- **Phone:** +91-7011510512
+- **Donations:** Contributions to the trust are eligible for 80G tax exemption
 
 ## Our Commitment
 
-The trust is committed to upholding the ancient traditions of the Jagannath temple and ensuring that future generations continue to connect with their spiritual roots.
+The society is committed to upholding the ancient traditions of the Jagannath temple and ensuring that future generations continue to connect with their spiritual roots.
 
 We welcome all devotees to become part of this noble mission by volunteering or contributing to the temple's welfare activities.
+
+**Jai Jagannath!**
 `,
   },
 

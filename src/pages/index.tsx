@@ -36,7 +36,7 @@ const jsonLd = {
       '@type': 'WebPage',
       '@id': `${site}/#webpage`,
       url: `${site}/`,
-      name: 'Jagannath Mandir Rohini — Sree Neelachala Seva Sangha',
+      name: 'Jagannath Mandir Rohini — Oriya Samaj',
       isPartOf: { '@id': `${site}/#website` },
       about: { '@id': `${site}/#organization` },
       datePublished: '2023-04-01',
